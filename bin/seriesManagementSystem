@@ -1,0 +1,8 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
+from SMS.serieManagementSystem import SMS
+import sys
+
+sms = SMS()
+sms.getArguments(sys.argv[1:])
