@@ -471,9 +471,9 @@ class SMS:
         tmpfiles.sort()
         basename = os.path.split(texFile)[1].split(".")[0]
         self.__log.debug("Basename "+basename)
-        for file in tmpfiles:
-            if file.find(".pdf")==-1 and file.find(basename)!=-1:
-                os.remove(os.path.join(outputDir, file))
+        for dafile in tmpfiles:
+            if dafile.find(".pdf")==-1 and dafile.find(basename)!=-1:
+                os.remove(os.path.join(outputDir, dafile))
 
     def __doLatex2(self, texFile, outputDir, doBibTex=True):
         #deprecated
@@ -517,9 +517,9 @@ class SMS:
         tmpfiles = os.listdir(outputDir);
         tmpfiles.sort()
         basename = os.path.split(texFile)[1].split(".")[0]
-        for file in tmpfiles:
-            if file.find(".pdf")==-1 and file.find(basename)!=-1:
-                os.remove(os.path.join(outputDir, file))
+        for dafile in tmpfiles:
+            if dafile.find(".pdf")==-1 and dafile.find(basename)!=-1:
+                os.remove(os.path.join(outputDir, dafile))
 
     def __doUpdateBibTex(self):
         """Updates the last visited date of the nocite bibtex items"""
@@ -553,32 +553,10 @@ class SMS:
         self.__log.info("Removing temp files")
         tmpfile = os.listdir('/tmp')
         tmpfile.sort()
-        for file in tmpfile:
-            if file.find("serie") != -1 or file.find("solution") != -1 or file.find("wbtitle")!= -1:
-                self.__log.debug("Removing /tmp/"+file)
-                os.remove('/tmp/'+file)
-
-    def __myZip_old(self, directory, destZipFile, zipPrefix="."):
-        """Zips a directory recursively to the destination zipfile"""
-        self.__log.debug("Zipping directory: "+directory+" to "+destZipFile)
-        if len(os.listdir(directory)) == 0:
-            return
-        #zippedDir = zipfile.ZipFile(destZipFile, 'w', compression=zipfile.ZIP_DEFLATED)
-        zippedDir = zipfile.ZipFile(destZipFile, 'w')
-        def zipTreeWalker(args, dirname, fnames):
-            theZipArch = args[0]
-            root = args[1]
-            prefix = args[2]
-            fnames.sort()
-            for file in fnames:
-                file = os.path.join(dirname, file)
-                archiveName = file[len(os.path.commonprefix((root, file)))+1:]
-                archiveName = os.path.join(prefix, archiveName)
-                if not os.path.isdir(file):
-                    theZipArch.write(file, archiveName)
-        os.path.walk(directory, zipTreeWalker, [zippedDir, directory, zipPrefix])
-        zippedDir.close()
-        return destZipFile
+        for dafile in tmpfile:
+            if dafile.find("serie") != -1 or dafile.find("solution") != -1 or dafile.find("wbtitle")!= -1:
+                self.__log.debug("Removing /tmp/"+dafile)
+                os.remove('/tmp/'+dafile)
     
     def __myZip(self, directory, destZipFile, zipPrefix="."):
         """Zips a directory recursively to the destination zipfile"""
@@ -591,21 +569,21 @@ class SMS:
             root = args[1]
             prefix = args[2]
             fnames.sort()
-            for file in fnames:
-                file = os.path.join(dirname, file)
-                archiveName = file[len(os.path.commonprefix((root, file)))+1:]
+            for dafile in fnames:
+                dafile = os.path.join(dirname, dafile)
+                archiveName = dafile[len(os.path.commonprefix((root, dafile)))+1:]
                 archiveName = os.path.join(prefix, archiveName)
-                if not os.path.isdir(file):
-                    theZipArch.write(file, archiveName)
+                if not os.path.isdir(dafile):
+                    theZipArch.write(dafile, archiveName)
         for root, dirs, files in os.walk(directory, topdown=True):
             dirs[:] = [d for d in dirs if d not in self.__exclude_from_zip]
             zipTreeWalker([zippedDir, directory, zipPrefix], root, files)
-        
 
     def __myTar(self, directory, destTarFile, tarPrefix="."):
         """Creates a tar.gz file of a directory to destTarFile"""
-        def isSvn(f):
-            return f.endswith('.svn') or f.endswith('.git') or f == 'nbproject'
+        exclude_list = ['nbproject', 'dist', 'reports', 'bin', 'doc', 'group.properties']
+        def needToExclude(f):
+            return f.endswith('.svn') or f.endswith('.git') or f.endswith('~') or f in exclude_list
         
         self.__log.debug("Tar.gz - ing "+directory+" to "+destTarFile+". Using python tar")
         containingFolder = os.path.basename(destTarFile)[:os.path.basename(destTarFile).find(".")]
@@ -616,8 +594,9 @@ class SMS:
         tarArchive = tarfile.open(tarTempName, 'w:gz')
         cwd = os.getcwd()
         os.chdir(os.path.join(cwd, directory))
-        for file in files:
-            tarArchive.add(file, containingFolder+"/"+file, exclude=isSvn)
+        self.__log.debug('Available files for tar: '+str(files))
+        for f in files:
+            tarArchive.add(f,  exclude=needToExclude)
         os.chdir(cwd)
         if len(tarArchive.getmembers()) == 0: 
             return
@@ -625,25 +604,11 @@ class SMS:
         
         shutil.move(tarTempName, destTarFile)
         return destTarFile
-    
-    def __sysTar(self, directory, destTarFile, tarPrefix="."):
-        cwd = os.getcwd()
-        self.__log.debug("Tar.gz - ing "+directory+" to "+destTarFile+". Using system tar")
-        tarTempName = "/tmp/tmp.tar.gz"
-        basename = os.path.basename(directory)
-        dirname = os.path.dirname(directory)
-        os.chdir(os.path.join(cwd, dirname))
-        subprocess.call(["tar -czf "+tarTempName+" --exclude='\.svn' "+basename], shell=True, cwd="./", stdout=open("/dev/stdout", 'w'))
-        os.chdir(cwd)
-        shutil.move(tarTempName, destTarFile)
-        
-
-
 
     def cleanDSStore(self, dir):
         def cleaner(currdir, dirs, files):
             for item in files:
-                if (item.find("DS_Store") != -1):
+                if item.find("DS_Store") != -1:
                     self.__log.debug("removing "+currdir+"/"+item)
                     os.remove(os.path.join(currdir, item))
         for root, dirs, files in os.walk("./"):
@@ -689,7 +654,6 @@ class SMS:
         except checkInstallException as x:
             self.__log.error("Please ensure that the needed utilities ("+x.missing+") are installed and on the $PATH")
             sys.exit(-1)
-
 
     def usage(self):
         print ('Usage:')
@@ -761,7 +725,7 @@ class SMS:
                     self.__serie = int(raw_input ("Which serie do you want to build? "))
                 self.__log.info("Building Serie %s", self.__serie)
                 self.__doBuildSerie()
-                if(self.__smscdozipfiles):
+                if self.__smscdozipfiles:
                     self.__log.info("Zipping "+self.__smscmoodleOutputDir+str(self.__serie)+" into "+self.__smscmoodleOutputDir+str(self.__serie)+'.zip')
                     self.__myZip(self.__smscmoodleOutputDir+str(self.__serie), self.__smscmoodleOutputDir+str(self.__serie)+'.zip', self.__smscmoodleOutputDir+str(self.__serie))
                     if self.__smscremoveUnzipped:
@@ -770,7 +734,7 @@ class SMS:
             elif option in ["--build-all-series"]:
                 self.__log.info("Building All Available Series")
                 self.doBuildAllSeries()
-                if(self.__smscdozipfiles):
+                if self.__smscdozipfiles:
                     self.__log.info("Zipping "+self.__smscmoodleOutputDir+" into "+self.__smscmoodleOutputDir+'.zip')
                     self.__myZip(self.__smscmoodleOutputDir, self.__smscmoodleOutputDir+'.zip', self.__smscmoodleOutputDir)
                     if self.__smscremoveUnzipped:
