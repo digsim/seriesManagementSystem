@@ -42,8 +42,6 @@ import zipfile
 import tarfile
 import datetime
 import re
-import string
-import optparse
 from os.path import dirname, join, expanduser
 
 class SMS:
@@ -75,10 +73,7 @@ class SMS:
             self.__smscaddClearPage = smsConfig.getboolean("Config", "addClearPage")
         else:
             self.__smscaddClearPage = False
-        if smsConfig.has_option("Config", "usepdftk"):
-            self.__usepdftk = True
-        else:
-            self.__usepdftk = False
+        self.__usepdftk = smsConfig.getboolean("Config", "usepdftk")
         self.__exoDirName = smsConfig.get("Config", "exoDirName")
         self.__seriesConfigDir = smsConfig.get("Config", "seriesConfigDir")
         self.__outputDir = smsConfig.get("Config", "outputDir")
@@ -119,8 +114,8 @@ class SMS:
         self.__log.debug("Creating Exercice Structure %s", self.__exercise)
         os.chdir(self.__cwd)
         os.mkdir(self.__exoDirName+"/"+"ex"+str(self.__exercise))
-        for dir in self.__exoStructure:
-            os.mkdir(self.__exoDirName+"/"+"ex"+str(self.__exercise)+"/"+dir)
+        for adir in self.__exoStructure:
+            os.mkdir(self.__exoDirName+"/"+"ex"+str(self.__exercise)+"/"+adir)
         extex = open(self.__exoDirName+"/"+"ex"+str(self.__exercise)+"/latex/exo"+str(self.__exercise)+".tex", 'w')
         soltex = open(self.__exoDirName+"/"+"ex"+str(self.__exercise)+"/latex/exo"+str(self.__exercise)+"sol.tex", 'w')
         extex.write("\exercice{}\n")
@@ -133,11 +128,10 @@ class SMS:
     def __nextUnusedExercice(self):
         lastExo = 0
         dirs = os.listdir(self.__exoDirName)
-        #dirs.sort()
         dirs = self.natsort(dirs)
-        for dir in dirs:
-            exoNumber = int(dir.partition('ex')[2])
-            if(exoNumber > lastExo):
+        for adir in dirs:
+            exoNumber = int(adir.partition('ex')[2])
+            if exoNumber > lastExo:
                 lastExo = exoNumber
         lastExo =  int(lastExo)+1
         return lastExo
@@ -152,7 +146,7 @@ class SMS:
         numbers = seriesConfig.get('Serie', 'exo-numbers')
         #draft = seriesConfig.getboolean('Serie', 'draft')
         # check if dir exists with os.path.isdir
-        if(os.path.isdir(os.path.join(self.__outputDir, self.__smscmoodleOutputDir+str(self.__serie)))):
+        if os.path.isdir(os.path.join(self.__outputDir, self.__smscmoodleOutputDir+str(self.__serie))):
             shutil.rmtree(os.path.join(self.__outputDir, self.__smscmoodleOutputDir+str(self.__serie)))
         os.mkdir(os.path.join(self.__outputDir, self.__smscmoodleOutputDir+str(self.__serie)))
         os.mkdir(os.path.join(os.path.join(self.__outputDir, self.__smscmoodleOutputDir+str(self.__serie)),'donne'))
@@ -171,14 +165,14 @@ class SMS:
         self.__serie = seriesnumber
         self.__doBuildSerie()
 
-    def __doCreateSerie(self, titles, numbers, outputDir):
-        file = "/tmp/serie"+str(self.__serie)+".tex"
-        serie = open(file, 'w') #use open(file 'a') for appending to a given file
+    def __doCreateSerie(self, _titles, _numbers, _outputDir):
+        afile = "/tmp/serie"+str(self.__serie)+".tex"
+        serie = open(afile, 'w') #use open(file 'a') for appending to a given file
         self.__smscsolutiontext = ''
-        self.__createHeader(serie, titles)
+        self.__createHeader(serie, _titles)
 
 
-        for number in numbers:
+        for number in _numbers:
             serie.write(r'\setcounter{section}{'+number+'}\n')
             serie.write(r'\addtocounter{section}{-1}'+'\n')
             serie.write(r'\renewcommand{\includepath}{\compilationpath/'+self.__exoDirName+'/ex'+number+'/latex/resources}'+'\n')
@@ -189,16 +183,16 @@ class SMS:
         self.__createFooter(serie)
         serie.close()
 
-        self.__doLatex(file, outputDir)
+        self.__doLatex(afile, _outputDir)
 
 
-    def __doCreateSolution(self, titles, numbers, outputDir):
-        file = "/tmp/solution"+str(self.__serie)+".tex"
-        solution = open(file, 'w')
+    def __doCreateSolution(self, _titles, _numbers, _outputDir):
+        afile = "/tmp/solution"+str(self.__serie)+".tex"
+        solution = open(afile, 'w')
         self.__smscsolutiontext = 'Solution'
-        self.__createHeader(solution, titles)
+        self.__createHeader(solution, _titles)
 
-        for number in numbers:
+        for number in _numbers:
             solution.write(r'\setcounter{section}{'+number+'}\n')
             solution.write(r'\addtocounter{section}{-1}'+'\n')
             solution.write(r'\renewcommand{\includepath}{\compilationpath/'+self.__exoDirName+'/ex'+number+'/latex/resources}'+'\n')
@@ -209,59 +203,59 @@ class SMS:
         self.__createFooter(solution)
         solution.close()
 
-        self.__doLatex(file, outputDir)
+        self.__doLatex(afile, _outputDir)
 
-    def __createHeader(self, file, titles):
-        file.write(r'\documentclass[francais,a4paper]{article}'+"\n")
-        file.write(r'\usepackage{sms}'+"\n")
-        file.write(r"\newcommand{\compilationpath}{./}"+"\n")
-        file.write(r'\newcommand{\prof}{'+self.__smsclecturer+'}'+"\n")
-        file.write(r'\newcommand{\course}{'+self.__smscname+'}'+"\n")
-        file.write(r'\newcommand{\theyear}{'+self.__smscyear+'}'+"\n")
-        file.write(r'\newcommand{\exercisetext}{'+self.__smscexercisetext+'}'+"\n")
-        file.write(r'\newcommand{\solutiontext}{'+self.__smscsolutiontext+'}'+"\n")
-        file.write(r'\newcommand{\thecontent} {\sffamily\bfseries '+self.__smsccontenttext+':}'+"\n")
-        file.write(r'\newcommand{\theheadertitle}{'+self.__smscheadertitle+'}'+"\n")
-        file.write(r'\newcommand{\unilogo}{'+self.__smscunilogo+'}'+"\n")
-        file.write(r'\newcommand{\groupelogo}{'+self.__smscgroupelogo+'}'+"\n")
-        #file.write(r"\input{\compilationpath/exercicepreamble}"+"\n")
-        file.write(r"% Number of the serie"+"\n")
-        file.write(r"\newcommand{\exercisenb}{"+str(self.__serie)+"}"+"\n")
-        file.write(r"\newcommand{\includepath}{\compilationpath}"+"\n")
-        file.write(r'\hypersetup{pdftitle={'+self.__smscpdftitle+'},pdfauthor={'+self.__smscpdfauthor+'},pdfkeywords={'+self.__smscpdfkeyword+"}}\n")
-        file.write(r"\begin{document}"+"\n")
-        file.write(r"\input{\compilationpath/captionnames}"+"\n")
-        file.write(r"% Header of the exercise:"+"\n")
-        file.write(r"\exheader"+"\n")
+    def __createHeader(self, _file, _titles):
+        _file.write(r'\documentclass[francais,a4paper]{article}'+"\n")
+        _file.write(r'\usepackage{sms}'+"\n")
+        _file.write(r"\newcommand{\compilationpath}{./}"+"\n")
+        _file.write(r'\newcommand{\prof}{'+self.__smsclecturer+'}'+"\n")
+        _file.write(r'\newcommand{\course}{'+self.__smscname+'}'+"\n")
+        _file.write(r'\newcommand{\theyear}{'+self.__smscyear+'}'+"\n")
+        _file.write(r'\newcommand{\exercisetext}{'+self.__smscexercisetext+'}'+"\n")
+        _file.write(r'\newcommand{\solutiontext}{'+self.__smscsolutiontext+'}'+"\n")
+        _file.write(r'\newcommand{\thecontent} {\sffamily\bfseries '+self.__smsccontenttext+':}'+"\n")
+        _file.write(r'\newcommand{\theheadertitle}{'+self.__smscheadertitle+'}'+"\n")
+        _file.write(r'\newcommand{\unilogo}{'+self.__smscunilogo+'}'+"\n")
+        _file.write(r'\newcommand{\groupelogo}{'+self.__smscgroupelogo+'}'+"\n")
+        #afile.write(r"\input{\compilationpath/exercicepreamble}"+"\n")
+        _file.write(r"% Number of the serie"+"\n")
+        _file.write(r"\newcommand{\exercisenb}{"+str(self.__serie)+"}"+"\n")
+        _file.write(r"\newcommand{\includepath}{\compilationpath}"+"\n")
+        _file.write(r'\hypersetup{pdftitle={'+self.__smscpdftitle+'},pdfauthor={'+self.__smscpdfauthor+'},pdfkeywords={'+self.__smscpdfkeyword+"}}\n")
+        _file.write(r"\begin{document}"+"\n")
+        _file.write(r"\input{\compilationpath/captionnames}"+"\n")
+        _file.write(r"% Header of the exercise:"+"\n")
+        _file.write(r"\exheader"+"\n")
 
-        if len(titles) != 0:
-            file.write(r"% Content of the exercise, topics"+"\n")
-            file.write(r"\content{"+"\n")
-            file.write(r"\begin{itemize}"+"\n")
-            for title in titles:
-                file.write(r'\item '+title+'\n')
-            file.write(r'\end{itemize}'+'\n')
-            file.write(r'}'+'\n')
+        if len(_titles) != 0:
+            _file.write(r"% Content of the exercise, topics"+"\n")
+            _file.write(r"\content{"+"\n")
+            _file.write(r"\begin{itemize}"+"\n")
+            for title in _titles:
+                _file.write(r'\item '+title+'\n')
+            _file.write(r'\end{itemize}'+'\n')
+            _file.write(r'}'+'\n')
 
-    def __createFooter(self, file):
+    def __createFooter(self, _file):
         for bib in self.__noCiteList:
-            file.write(r'\nocite{'+bib+'}\n')
-        file.write(r'\bibliography{bibdb}'+'\n')
-        file.write(r'\bibliographystyle{plain}'+'\n')
-        file.write(r'\end{document}'+'\n')
+            _file.write(r'\nocite{'+bib+'}\n')
+        _file.write(r'\bibliography{bibdb}'+'\n')
+        _file.write(r'\bibliographystyle{plain}'+'\n')
+        _file.write(r'\end{document}'+'\n')
 
-    def __addCodeDonne(self, exonumbers):
+    def __addCodeDonne(self, _exonumbers):
         """does nothing"""
         self.__log.info("Adding source code for donnee")
-        for number in exonumbers:
+        for number in _exonumbers:
             #self.__myZip(self.__exoDirName+"/"+"ex"+number+"/code/donne", os.path.join(os.path.join(self.__outputDir,self.__smscmoodleOutputDir+str(self.__serie)),'donne/donnee_s'+str(self.__serie)+'_e'+number+'.zip'), 'donnee_s'+str(self.__serie)+'_e'+number)
             self.__myTar(self.__exoDirName+"/"+"ex"+number+"/code/donne", os.path.join(os.path.join(self.__outputDir,self.__smscmoodleOutputDir+str(self.__serie)),'donne/donnee_s'+str(self.__serie)+'_e'+number+'.tar.gz'), 'donnee_s'+str(self.__serie)+'_e'+number)
             #self.__sysTar(self.__exoDirName+"/"+"ex"+number+"/code/donne", os.path.join(os.path.join(self.__outputDir,self.__smscmoodleOutputDir+str(self.__serie)),'donne/donnee_s'+str(self.__serie)+'_e'+number+'.tar.gz'), 'donnee_s'+str(self.__serie)+'_e'+number)
 
-    def __addCodeSolution(self, exonumbers):
+    def __addCodeSolution(self, _exonumbers):
         """does nothing"""
         self.__log.info("Adding source code for solution")
-        for number in exonumbers:
+        for number in _exonumbers:
             #self.__myZip(self.__exoDirName+"/"+"ex"+number+"/code/solution", os.path.join(os.path.join(self.__outputDir, self.__smscmoodleOutputDir+str(self.__serie)), 'solution/solution_s'+str(self.__serie)+'_e'+number+'.zip'), 'solution_s'+str(self.__serie)+'_e'+number)
             self.__myTar(self.__exoDirName+"/"+"ex"+number+"/code/solution", os.path.join(os.path.join(self.__outputDir, self.__smscmoodleOutputDir+str(self.__serie)), 'solution/solution_s'+str(self.__serie)+'_e'+number+'.tar.gz'), 'solution_s'+str(self.__serie)+'_e'+number)
             #self.__sysTar(self.__exoDirName+"/"+"ex"+number+"/code/solution", os.path.join(os.path.join(self.__outputDir, self.__smscmoodleOutputDir+str(self.__serie)), 'solution/solution_s'+str(self.__serie)+'_e'+number+'.tar.gz'), 'solution_s'+str(self.__serie)+'_e'+number)
@@ -313,7 +307,7 @@ class SMS:
         self.__cleanTempFiles()
 
 
-    def __makeWorkBookTitlePage(self, outputDir):
+    def __makeWorkBookTitlePage(self, _outputDir):
         file = "/tmp/0wbtitlepage.tex"
         self.__makeWorkBookTitlePageHeader(file)
         wbtitle = open(file, 'a')
@@ -335,10 +329,10 @@ class SMS:
             wbtitle.write(r"\end{itemize}"+"\n")
         wbtitle.close()
         self.__printWorkBookTitlePageFooter(file)
-        self.__doLatex(file, outputDir, False)
+        self.__doLatex(file, _outputDir, False)
 
-    def __makeWorkBookTitlePageHeader(self, file):
-        wbtitle = open(file, 'w')
+    def __makeWorkBookTitlePageHeader(self, _file):
+        wbtitle = open(_file, 'w')
         wbtitle.write(r"\documentclass[francais,a4paper]{article}"+"\n")
         wbtitle.write(r"\newcommand{\compilationpath}{./}"+"\n")
         wbtitle.write(r'\newcommand{\groupelogo}{'+self.__smscgroupelogo+'}'+"\n")
@@ -366,8 +360,8 @@ class SMS:
         wbtitle.write(r"\vspace{1cm}"+"\n")
         wbtitle.close()
 
-    def __printWorkBookTitlePageFooter(self, file):
-        wbtitle = open(file, 'a')
+    def __printWorkBookTitlePageFooter(self, _file):
+        wbtitle = open(_file, 'a')
         wbtitle.write(r"%\end{itemize}"+"\n")
         wbtitle.write(r"\rule{\linewidth}{1pt}"+"\n")
         wbtitle.write(r"\vfill"+"\n")
@@ -378,12 +372,12 @@ class SMS:
 
     def doMakeCatalogue(self):
         """Creates a pdf containing all exercises. Each exercise is always followed by its solution"""
-        file = "/tmp/catalogue.tex"
+        afile = "/tmp/catalogue.tex"
         self.__serie=0
         if os.path.isdir("Catalogue"):
             shutil.rmtree("Catalogue")
         os.mkdir("Catalogue")
-        catalogue = open(file, 'w') #use open(file 'a') for appending to a given file
+        catalogue = open(afile, 'w') #use open(file 'a') for appending to a given file
         self.__createHeader(catalogue, [])
         catalogue.write(r'\renewcommand{\exercice}[1]{\subsection*{Problem: #1}}'+"\n")
         catalogue.write(r'\renewcommand{\solution}[1]{\subsection*{Solution: #1}}'+"\n")
@@ -425,7 +419,7 @@ class SMS:
         self.__createFooter(catalogue)
         catalogue.close()
         outputDir = "Catalogue"
-        self.__doLatex(file, outputDir)
+        self.__doLatex(afile, outputDir)
 
     def __doPreviewExercice(self):
         self.__serie = 0
@@ -440,8 +434,8 @@ class SMS:
             arg.insert(0, cmd)
         subprocess.Popen(cmd+" /tmp/serie0.pdf", shell=True)
 
-    def previewExercice(self, exonumber):
-        self.__exercise = exonumber
+    def previewExercice(self, _exonumber):
+        self.__exercise = _exonumber
         self.__doPreviewExercice()
 
     def __doPreviewSolution(self):
@@ -457,69 +451,69 @@ class SMS:
             arg.insert(0, cmd)
         subprocess.Popen(cmd+" /tmp/solution0.pdf", shell=True)
 
-    def previewSolution(self, exonumber):
-        self.__exercise = exonumber
+    def previewSolution(self, _exonumber):
+        self.__exercise = _exonumber
         self.__doPreviewSolution()     
         
-    def __doLatex(self, texFile,  outputDir,  doBibTex=True):
-        self.__log.info("Running latex in %s on file %s", outputDir, texFile)
-        self.__log.debug("LaTeX command is: latexmk -pdf -silent -outdir={:s} {:s}".format(outputDir,  texFile))
-        status = subprocess.call(["latexmk", "-pdf",  "-silent",   "-outdir="+outputDir,   texFile], cwd="./", stdout=open("/dev/null", 'w'))
-        self.__log.info("Compilation succeded "+texFile)
+    def __doLatex(self, _texFile,  _outputDir,  _doBibTex=True):
+        self.__log.info("Running latex in %s on file %s", _outputDir, _texFile)
+        self.__log.debug("LaTeX command is: latexmk -pdf -silent -outdir={:s} {:s}".format(_outputDir,  _texFile))
+        status = subprocess.call(["latexmk", "-pdf",  "-silent",   "-outdir="+_outputDir,   _texFile], cwd="./", stdout=open("/dev/null", 'w'))
+        self.__log.info("Compilation succeded "+_texFile)
         # Alternatively use latexmk -c -jobname=texFile plus remove the *.tex file
-        tmpfiles = os.listdir(outputDir);
+        tmpfiles = os.listdir(_outputDir)
         tmpfiles.sort()
-        basename = os.path.split(texFile)[1].split(".")[0]
+        basename = os.path.split(_texFile)[1].split(".")[0]
         self.__log.debug("Basename "+basename)
         for dafile in tmpfiles:
             if dafile.find(".pdf")==-1 and dafile.find(basename)!=-1:
-                os.remove(os.path.join(outputDir, dafile))
+                os.remove(os.path.join(_outputDir, dafile))
 
-    def __doLatex2(self, texFile, outputDir, doBibTex=True):
+    def __doLatex2(self, _texFile, _outputDir, _doBibTex=True):
         #deprecated
         #self.__log.info("Running latex in %s on file %s", outputDir, texFile)
         #self.__log.info("Running latex in %s on file %s", os.getcwd(), texFile)
-        self.__log.info("Compiling %s",  texFile)
-        self.__log.debug("Compile command is: pdflatex -output-directory="+outputDir+" -halt-on-error "+texFile)
-        auxFile = os.path.split(texFile)[1].split(".")[0]+'.aux'
-        logFile = os.path.split(texFile)[1].split(".")[0]+'.log'
+        self.__log.info("Compiling %s",  _texFile)
+        self.__log.debug("Compile command is: pdflatex -output-directory="+_outputDir+" -halt-on-error "+_texFile)
+        auxFile = os.path.split(_texFile)[1].split(".")[0]+'.aux'
+        logFile = os.path.split(_texFile)[1].split(".")[0]+'.log'
         recompile = True
-        counter = 0;
+        counter = 0
         while recompile and counter < 5:
             recompile=False
             counter+=1
             self.__log.debug("Running latex for the "+str(counter)+" time")
-            status = subprocess.call(["pdflatex", "-output-directory="+outputDir, "-halt-on-error",  texFile], cwd="./", stdout=open("/dev/null", 'w'))
-            if doBibTex:
+            status = subprocess.call(["pdflatex", "-output-directory="+_outputDir, "-halt-on-error",  _texFile], cwd="./", stdout=open("/dev/null", 'w'))
+            if _doBibTex:
                 self.__log.debug("Running bibtex for the "+str(counter)+" time")
-                bibstatus = subprocess.call(["bibtex", os.path.join(outputDir,auxFile)], cwd="./", stdout=open("/dev/null", 'w'))
+                bibstatus = subprocess.call(["bibtex", os.path.join(_outputDir,auxFile)], cwd="./", stdout=open("/dev/null", 'w'))
                 self.__log.debug("Running latex again to reflect BibTeX changes")
-                status = subprocess.call(["pdflatex", "-output-directory="+outputDir, "-halt-on-error",  texFile], cwd="./", stdout=open("/dev/null", 'w'))
-                status = subprocess.call(["pdflatex", "-output-directory="+outputDir, "-halt-on-error",  texFile], cwd="./", stdout=open("/dev/null", 'w'))
+                status = subprocess.call(["pdflatex", "-output-directory="+_outputDir, "-halt-on-error",  _texFile], cwd="./", stdout=open("/dev/null", 'w'))
+                status = subprocess.call(["pdflatex", "-output-directory="+_outputDir, "-halt-on-error",  _texFile], cwd="./", stdout=open("/dev/null", 'w'))
             else:
                 bibstatus = 0
             if status != 0:
-                self.__log.error("Compilation error occured. Try executing by hand pdflatex -output-directory="+outputDir+" -halt-on-error "+texFile)
+                self.__log.error("Compilation error occured. Try executing by hand pdflatex -output-directory="+_outputDir+" -halt-on-error "+_texFile)
                 exit(1)
             if bibstatus !=0:
-                self.__log.error("Compilation error occured. Try executing by hand bibtex "+os.path.join(outputDir,auxFile))
+                self.__log.error("Compilation error occured. Try executing by hand bibtex "+os.path.join(_outputDir,auxFile))
                 exit(1)
-            log = open(os.path.join(outputDir, logFile), 'r')
+            log = open(os.path.join(_outputDir, logFile), 'r')
             for line in log:
                 for msg in self.__latex_recompile_messages:
                     if msg in line:
                         recompile=True
-                        self.__log.debug("Need to recompile "+texFile)
+                        self.__log.debug("Need to recompile "+_texFile)
                         self.__log.debug(line)
                         break
             log.close()
-        self.__log.debug("Compilation succeded "+texFile)
-        tmpfiles = os.listdir(outputDir);
+        self.__log.debug("Compilation succeded "+_texFile)
+        tmpfiles = os.listdir(_outputDir)
         tmpfiles.sort()
-        basename = os.path.split(texFile)[1].split(".")[0]
+        basename = os.path.split(_texFile)[1].split(".")[0]
         for dafile in tmpfiles:
             if dafile.find(".pdf")==-1 and dafile.find(basename)!=-1:
-                os.remove(os.path.join(outputDir, dafile))
+                os.remove(os.path.join(_outputDir, dafile))
 
     def __doUpdateBibTex(self):
         """Updates the last visited date of the nocite bibtex items"""
@@ -558,12 +552,12 @@ class SMS:
                 self.__log.debug("Removing /tmp/"+dafile)
                 os.remove('/tmp/'+dafile)
     
-    def __myZip(self, directory, destZipFile, zipPrefix="."):
+    def __myZip(self, _directory, _destZipFile, _zipPrefix="."):
         """Zips a directory recursively to the destination zipfile"""
-        self.__log.debug("Zipping directory: "+directory+" to "+destZipFile)
-        if len(os.listdir(directory)) == 0:
+        self.__log.debug("Zipping directory: "+_directory+" to "+_destZipFile)
+        if len(os.listdir(_directory)) == 0:
             return
-        zippedDir = zipfile.ZipFile(destZipFile, 'w')
+        zippedDir = zipfile.ZipFile(_destZipFile, 'w')
         def zipTreeWalker(args, dirname, fnames):
             theZipArch = args[0]
             root = args[1]
@@ -575,25 +569,25 @@ class SMS:
                 archiveName = os.path.join(prefix, archiveName)
                 if not os.path.isdir(dafile):
                     theZipArch.write(dafile, archiveName)
-        for root, dirs, files in os.walk(directory, topdown=True):
+        for root, dirs, files in os.walk(_directory, topdown=True):
             dirs[:] = [d for d in dirs if d not in self.__exclude_from_zip]
-            zipTreeWalker([zippedDir, directory, zipPrefix], root, files)
+            zipTreeWalker([zippedDir, _directory, _zipPrefix], root, files)
 
-    def __myTar(self, directory, destTarFile, tarPrefix="."):
+    def __myTar(self, _directory, _destTarFile, _tarPrefix="."):
         """Creates a tar.gz file of a directory to destTarFile"""
         exclude_list = ['nbproject', 'dist', 'reports', 'bin', 'doc', 'group.properties']
         def needToExclude(f):
             return f.endswith('.svn') or f.endswith('.git') or f.endswith('~') or f in exclude_list
         
-        self.__log.debug("Tar.gz - ing "+directory+" to "+destTarFile+". Using python tar")
-        containingFolder = os.path.basename(destTarFile)[:os.path.basename(destTarFile).find(".")]
+        self.__log.debug("Tar.gz - ing "+_directory+" to "+_destTarFile+". Using python tar")
+        containingFolder = os.path.basename(_destTarFile)[:os.path.basename(_destTarFile).find(".")]
         tarTempName = "/tmp/tmp.tar.gz"
-        files = os.listdir(directory)
+        files = os.listdir(_directory)
         if len(files) == 0:
             return
         tarArchive = tarfile.open(tarTempName, 'w:gz')
         cwd = os.getcwd()
-        os.chdir(os.path.join(cwd, directory))
+        os.chdir(os.path.join(cwd, _directory))
         self.__log.debug('Available files for tar: '+str(files))
         for f in files:
             tarArchive.add(f,  exclude=needToExclude)
@@ -602,22 +596,22 @@ class SMS:
             return
         tarArchive.close()
         
-        shutil.move(tarTempName, destTarFile)
-        return destTarFile
+        shutil.move(tarTempName, _destTarFile)
+        return _destTarFile
 
-    def cleanDSStore(self, dir):
-        def cleaner(currdir, dirs, files):
-            for item in files:
+    def cleanDSStore(self, _folder):
+        def cleaner(_currdir, _dirs, _files):
+            for item in _files:
                 if item.find("DS_Store") != -1:
-                    self.__log.debug("removing "+currdir+"/"+item)
-                    os.remove(os.path.join(currdir, item))
-        for root, dirs, files in os.walk("./"):
+                    self.__log.debug("removing "+_currdir+"/"+item)
+                    os.remove(os.path.join(_currdir, item))
+        for root, dirs, files in os.walk(_folder):
             #self.cleanDSStore(root, dirs, files)
             cleaner(root, dirs, files)
 
-    def natsort(self, list_):
-        self.__log.debug("Will filter the list "+str(list_))
-        filteredList = [elem for elem in list_ if not elem.startswith(".")]
+    def natsort(self, _list):
+        self.__log.debug("Will filter the list "+str(_list))
+        filteredList = [elem for elem in _list if not elem.startswith(".")]
         self.__log.debug('Filtered list: '+str(filteredList))
         # decorate
         tmp = [ (int(re.search('\d+', i).group(0)), i) for i in filteredList ]
