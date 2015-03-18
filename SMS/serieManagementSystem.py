@@ -60,10 +60,7 @@ class SMS:
         self.__keepTempFiles = False
         
         self.__log.debug("\033[1;33m"+self.__cwd+"\033[0m")
-        self.__exoDirName = "Exercices"
-        self.__seriesConfigDir = "Series_properties"
         self.__exoStructure = ["code", "code/donne", "code/solution", "latex", "latex/ressources", "latex/ressources/figures", "latex/ressources/code"]
-        self.__outputDir = "./"
 
         smsConfig = ConfigParser.SafeConfigParser()
         self.__log.debug("Reading general configuration from lecture.cfg")
@@ -82,6 +79,9 @@ class SMS:
             self.__usepdftk = True
         else:
             self.__usepdftk = False
+        self.__exoDirName = smsConfig.get("Config", "exoDirName")
+        self.__seriesConfigDir = smsConfig.get("Config", "seriesConfigDir")
+        self.__outputDir = smsConfig.get("Config", "outputDir")
         self.__smscname = smsConfig.get("Lecture", "name")
         self.__smsclecturer = smsConfig.get("Lecture", "lecturer")
         self.__smscyear = smsConfig.get("Lecture", "year")
