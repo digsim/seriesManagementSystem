@@ -1,0 +1,168 @@
+\ProvidesPackage{sms}
+\usepackage{epsfig}
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{hhline}
+\usepackage{palatino}
+\usepackage{fancyheadings}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage[french]{babel}
+\usepackage[utf8]{inputenc}
+\usepackage{ae, pslatex}	% Joli output en PDF
+\usepackage{amsmath}
+\usepackage{amsfonts}		% Extension AMS (définie les commandes \frak et \Bbb et installe les fonts msam, msbm, eufm, cmmib et cmbsy)
+\usepackage{amssymb}            % Extension AMS (symboles mathématiques pas disponibles dans TeX/LaTeX)
+\usepackage{amsthm}             % Extension AMS (version ameliorée pour la commande \newtheorem)
+\usepackage{array}              % end les options des environnements ARRAY et TABULAR.
+\usepackage{color}              % Permet l'utilisation des couleurs.
+\usepackage{colortbl}		% Permet l'utilisation des couleurs dans les tableaux.
+%%\usepackage{draftwatermark} % Imprime 'DRAFT' ('BRUILLON') en fond de la page.
+%%\usepackage{endnotes}          % Renvoie les notes en fin de document.
+%%\usepackage{graphics}          % Manipulation de boîtes et importation de graphismes.
+%%\usepackage[dvips]{graphicx}   %
+\usepackage{supertabular}
+\usepackage[T1]{fontenc}
+
+\usepackage{latexsym}           % Définit nombreux symboles mathé,atiques.
+\usepackage{enumerate}
+\usepackage{xcolor}
+
+\usepackage{listings}
+\usepackage[pdftex=true,pdfpagelabels,linkbordercolor=white,colorlinks=true,urlcolor=blue]{hyperref}
+
+%\DeclareGraphicsRule{.jpg}{eps}{}{`jpeg2ps #1}
+% Here we define and configure the listings environment
+\definecolor{listinggray}{gray}{0.9999}
+\definecolor{listingyellow}{rgb}{1,1,0.9}
+\definecolor{commentgreen}{rgb}{0,0.7,0} 
+
+\lstset {
+showstringspaces=false,
+%frame=shadowbox,
+extendedchars=true,
+basicstyle=\normalfont\helv\scriptsize,
+numbers=left,
+numberstyle=\tiny,
+numbersep=5pt,
+stepnumber=2,
+language=Java,
+breaklines,
+tabsize=2,
+backgroundcolor=\color{listingyellow},
+rulecolor=\color{blue},
+rulesepcolor=\color{black},
+linewidth=\linewidth,
+keywordstyle=\bfseries\color{blue},
+commentstyle=\color{commentgreen},
+captionpos=b,
+abovecaptionskip=\medskipamount,
+belowcaptionskip=\medskipamount,
+escapeinside={(*@}{@*)},
+}
+
+
+% Defining some variables
+%\newcommand{\prof}{Prof. Dr. Ulrich Ultes-Nitsche \& Andreas Ruppen}
+%\newcommand{\course}{System II --- Telecommunications}
+%\newcommand{\theyear}{SP 2008}
+%\newcommand{\exercisetext}{Serie}
+%\newcommand{\thecontent} {\sffamily\bfseries Content:}
+%\newcommand{\theheadertitle}{Exercices}
+
+% Page setup: margins...
+\addtolength{\textheight}{2.15cm}
+\addtolength{\topmargin}{-2.15cm}
+\addtolength{\textwidth}{5cm}
+\addtolength{\evensidemargin}{-2.5cm}
+\addtolength{\oddsidemargin}{-2.5cm}
+\addtolength{\headheight}{35pt}
+\addtolength{\footskip}{0.4cm}
+%\setlength{\headrulewidth}{1pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{6pt}
+
+
+% Redefining Section
+ \makeatletter
+ \renewcommand{\section}{\@startsection{section}{1}{0pt}{12pt}{1pt}{\sffamily \bfseries}}
+ \renewcommand{\thesection}{(\arabic{section})}
+ %\newcommand{\none}{\hspace{0.1pt}}
+ \renewcommand{\subsection}{\@startsection{subsection}{2}{0pt}{10pt}{1pt}{\small \bfseries \itshape}}
+ \renewcommand{\thesubsection}{\Alph{subsection}}
+ \newcommand{\none}{\hspace{0.1pt}}
+
+
+% \makeatletter
+% \renewcommand{\section}{\@startsection{section}{1}{0pt}{12pt}{1pt}{\sffamily \bfseries}}
+% \renewcommand{\thesection}{\arabic{section})}
+% \renewcommand{\none}{\hspace{0.1pt}}
+
+% Gray boxes
+\definecolor{MyGray}{rgb}{0.96,0.97,0.98}
+\makeatletter\newenvironment{graybox}{%
+   \begin{lrbox}{\@tempboxa}\begin{minipage}{\columnwidth}}{\end{minipage}\end{lrbox}%
+   \colorbox{MyGray}{\usebox{\@tempboxa}}
+}\makeatother
+
+% Headers and footers
+\makeatother
+\pagestyle{fancy}
+
+\rhead{
+\begin{tabular}{r}
+\multirow{4}{1.6cm}{\includegraphics[height=1.1cm]{\compilationpath/logos/\groupelogo}} \\
+\\
+\\
+\\
+\end{tabular}
+\vspace{0.05mm} }
+
+\chead{
+\begin{tabular}{c}
+\\
+\footnotesize{ \textsl{\textsf{\course\hspace{1mm}-\hspace{1mm}\theheadertitle\hspace{1mm}-\hspace{1mm}\theyear}}}  \\
+\footnotesize{ \textsl{\textsf{\prof}}}                                                                       \\
+\\
+\end{tabular}
+\vspace{0.05mm} }
+
+\lhead{
+\begin{tabular}{l}
+\multirow{4}{2.45cm}{\includegraphics[height=1.2cm]{\compilationpath/logos/\unilogo}}  \\
+\\
+\\
+\\
+\end{tabular}
+\vspace{0.05mm} }
+
+\cfoot{--\hspace{2mm} \thepage \hspace{2mm}--}
+
+
+\newcommand{\exheader}{
+\begin{center}
+{\Large
+\begin{bfseries}
+\begin{sffamily}
+    {\exercisetext \hspace{1.2pt} \exercisenb \hspace{1.2pt} \solutiontext}
+\end{sffamily}
+\end{bfseries}}
+\end{center}
+\rule{\linewidth}{1pt}
+\vspace{0.2mm}
+}
+
+\newcommand{\content}[1]{
+\textbf{\thecontent}
+#1
+}
+
+
+
+\newcommand{\apath}[1]{\url{#1}}
+\newcommand{\squote}[1]{``#1''}
+\newcommand{\exercice}[1]{\section{#1}}
+\newcommand{\solution}[1]{\section{#1}}
+\newcommand{\question}[1]{\subsection{#1}}
+\newcommand{\lastVisited}[3]{(accessed #2 #1, #3)}
+\newcommand{\biburl}[4]{{\apath{#1} \lastVisited{#2}{#3}{#4}}}
