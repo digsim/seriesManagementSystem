@@ -163,12 +163,12 @@ class SMS:
         latex.createHeader(serie, _titles)
 
         for number in _numbers:
-            serie.write(r"\newpage"+"\n")
+            serie.write(r'\setcounter{section}{'+number+'}\n')
+            serie.write(r'\addtocounter{section}{-1}'+'\n')
             serie.write(r'\renewcommand{\includepath}{\compilationpath/'+self.__exoDirName+'/ex'+number+'/latex/ressources}'+'\n')
             exo = open(self.__exoDirName+"/"+"ex"+number+"/latex/exo"+number+".tex", 'r')
             for line in exo:
                 serie.write(line)
-            serie.write(r"\clearpage"+"\n")
 
         latex.createFooter(serie)
         serie.close()
@@ -180,10 +180,11 @@ class SMS:
         texfile = "/tmp/solution"+str(self.__serie)+".tex"
         solution = open(texfile, 'w')
         latex = LaTeX(self.__serie)
-        latex.createHeader(solution, _titles)
+        latex.createHeader(solution, _titles, True)
 
         for number in _numbers:
-            solution.write(r"\newpage"+"\n")
+            solution.write(r'\setcounter{section}{'+number+'}\n')
+            solution.write(r'\addtocounter{section}{-1}'+'\n')
             solution.write(r'\renewcommand{\includepath}{\compilationpath/'+self.__exoDirName+'/ex'+number+'/latex/ressources}'+'\n')
             exo = open(self.__exoDirName+"/"+"ex"+number+"/latex/exo"+number+"sol.tex", 'r')
             for line in exo:

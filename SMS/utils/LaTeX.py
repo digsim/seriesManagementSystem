@@ -62,7 +62,7 @@ class LaTeX:
         self.__log = logging.getLogger('seriesManagementSystem')
 
 
-    def createHeader(self, _file, titles):
+    def createHeader(self, _file, titles, isSolution=False):
         _file.write(r'\documentclass[francais,a4paper]{article}'+"\n")
         _file.write(r'\usepackage{sms}'+"\n")
         _file.write(r"\newcommand{\compilationpath}{./}"+"\n")
@@ -70,7 +70,11 @@ class LaTeX:
         _file.write(r'\newcommand{\course}{'+self.__name+'}'+"\n")
         _file.write(r'\newcommand{\theyear}{'+self.__year+'}'+"\n")
         _file.write(r'\newcommand{\exercisetext}{'+self.__exercisetext+'}'+"\n")
-        _file.write(r'\newcommand{\solutiontext}{'+self.__solutiontext+'}'+"\n")
+        if isSolution:
+            solutionText = self.__solutiontext
+        else:
+            solutionText = ''
+        _file.write(r'\newcommand{\solutiontext}{'+solutionText+'}'+"\n")
         _file.write(r'\newcommand{\thecontent} {\sffamily\bfseries '+self.__contenttext+':}'+"\n")
         _file.write(r'\newcommand{\theheadertitle}{'+self.__headertitle+'}'+"\n")
         _file.write(r'\newcommand{\unilogo}{'+self.__unilogo+'}'+"\n")
