@@ -155,8 +155,8 @@ class SMS:
 
         Utils.cleanTempFiles([])
 
-    def __doCreateSerie(self, _titles, _numbers, _outputDir):
-        filename = "serie"+str(self.__serie)
+    def __doCreateSerie(self, _titles, _numbers, _outputDir, filename = None):
+        filename = filename or "serie"+str(self.__serie)
         texfile = os.path.join("/tmp/", filename+".tex")
         serie = open(texfile, 'w') #use open(file 'a') for appending to a given file
         self.__smscsolutiontext = ''
@@ -178,8 +178,8 @@ class SMS:
         return os.path.join(_outputDir, filename+".pdf")
 
 
-    def __doCreateSolution(self, _titles, _numbers, _outputDir):
-        filename = "solution"+str(self.__serie)
+    def __doCreateSolution(self, _titles, _numbers, _outputDir, filename = None):
+        filename = filename or "solution"+str(self.__serie)
         texfile = os.path.join("/tmp/", filename+".tex")
         solution = open(texfile, 'w')
         latex = LaTeX(self.__serie)
@@ -250,18 +250,10 @@ class SMS:
             numbers = seriesConfig.get('Serie', 'exo-numbers')
 
             outputDir = self.__smscmoodleOutputDir
-            seriesname = self.__doCreateSerie(titles.split(','), numbers.split(','), outputDir)
-            solutionname = self.__doCreateSolution(titles.split(','), numbers.split(','), outputDir)
-
-            oldseriesname = os.path.splitext(os.path.basename(seriesname))[0]+".pdf"
-            newseriesname = str(self.__serie)+"serie.pdf"
-            self.__log.debug("Renaming "+os.path.join(outputDir, oldseriesname)+" to "+os.path.join(outputDir, newseriesname))
-            os.rename(os.path.join(outputDir, oldseriesname), os.path.join(outputDir, newseriesname))
-
-            oldsolutionname = os.path.splitext(os.path.basename(solutionname))[0]+".pdf"
-            newsolutionname = str(self.__serie)+"solution.pdf"
-            self.__log.debug("Renaming "+os.path.join(outputDir, oldsolutionname)+" to "+os.path.join(outputDir, newsolutionname))
-            os.rename(os.path.join(outputDir, oldsolutionname), os.path.join(outputDir, newsolutionname))
+            seriesname = str(self.__serie)+"serie"
+            seriesname = self.__doCreateSerie(titles.split(','), numbers.split(','), outputDir, seriesname)
+            solutionname = str(self.__serie)+"solution"
+            solutionname = self.__doCreateSolution(titles.split(','), numbers.split(','), outputDir, solutionname)
 
         self.__makeWorkBookTitlePage(outputDir)
         if self.__usepdftk:
