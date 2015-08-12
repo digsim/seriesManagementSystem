@@ -156,7 +156,8 @@ class SMS:
         Utils.cleanTempFiles([])
 
     def __doCreateSerie(self, _titles, _numbers, _outputDir):
-        texfile = "/tmp/serie"+str(self.__serie)+".tex"
+        filename = "serie"+str(self.__serie)
+        texfile = os.path.join("/tmp/", filename+".tex")
         serie = open(texfile, 'w') #use open(file 'a') for appending to a given file
         self.__smscsolutiontext = ''
         latex = LaTeX(self.__serie)
@@ -174,10 +175,12 @@ class SMS:
         serie.close()
 
         Utils.doLatex(texfile, _outputDir)
+        return os.path.join(_outputDir, filename+".pdf")
 
 
     def __doCreateSolution(self, _titles, _numbers, _outputDir):
-        texfile = "/tmp/solution"+str(self.__serie)+".tex"
+        filename = "solution"+str(self.__serie)
+        texfile = os.path.join("/tmp/", filename+".tex")
         solution = open(texfile, 'w')
         latex = LaTeX(self.__serie)
         latex.createHeader(solution, _titles, True)
@@ -194,6 +197,7 @@ class SMS:
         solution.close()
 
         Utils.doLatex(texfile, _outputDir)
+        return os.path.join(_outputDir, filename+".pdf")
 
     def __addCodeDonne(self, _exonumbers):
         """Add the code skeletons which are given wich each exercise"""
@@ -244,10 +248,21 @@ class SMS:
             seriesConfig.read(self.__seriesConfigDir+"/"+config)
             titles = seriesConfig.get('Serie', 'titles')
             numbers = seriesConfig.get('Serie', 'exo-numbers')
-            outputDir=self.__smscmoodleOutputDir
-            self.__doCreateSerie(titles.split(','), numbers.split(','), outputDir)
-            outputDir =  self.__smscmoodleOutputDir
-            self.__doCreateSolution(titles.split(','), numbers.split(','), outputDir)
+
+            outputDir = self.__smscmoodleOutputDir
+            seriesname = self.__doCreateSerie(titles.split(','), numbers.split(','), outputDir)
+            solutionname = self.__doCreateSolution(titles.split(','), numbers.split(','), outputDir)
+
+            oldseriesname = os.path.splitext(os.path.basename(seriesname))[0]+".pdf"
+            newseriesname = str(self.__serie)+"serie.pdf"
+            self.__log.debug("Renaming "+os.path.join(outputDir, oldseriesname)+" to "+os.path.join(outputDir, newseriesname))
+            os.rename(os.path.join(outputDir, oldseriesname), os.path.join(outputDir, newseriesname))
+
+            oldsolutionname = os.path.splitext(os.path.basename(solutionname))[0]+".pdf"
+            newsolutionname = str(self.__serie)+"solution.pdf"
+            self.__log.debug("Renaming "+os.path.join(outputDir, oldsolutionname)+" to "+os.path.join(outputDir, newsolutionname))
+            os.rename(os.path.join(outputDir, oldsolutionname), os.path.join(outputDir, newsolutionname))
+
         self.__makeWorkBookTitlePage(outputDir)
         if self.__usepdftk:
             subprocess.call(["pdftk "+outputDir+"/*.pdf cat output workbook.pdf"], shell=True, cwd="./", stdout=DEVNULL, stderr=STDOUT)
