@@ -115,14 +115,14 @@ class SMS:
         self.__exclude_from_zip = set(['nbproject'])
 
     def createNewExercice(self):
-        self.__exercise = Utils.nextUnusedExercice()
+        self.__exercise = Utils.nextUnusedExercice(self.__exoDirName)
         self.__log.debug("Creating Exercice Structure %s", self.__exercise)
         os.chdir(self.__cwd)
         os.mkdir(self.__exoDirName+"/"+"ex"+str(self.__exercise))
         for adir in self.__exoStructure:
             os.mkdir(self.__exoDirName+"/"+"ex"+str(self.__exercise)+"/"+adir)
-        extex = open(self.__exoDirName+"/"+"ex"+str(self.__exercise)+"/latex/exo"+str(self.__exercise)+".tex", 'w')
-        soltex = open(self.__exoDirName+"/"+"ex"+str(self.__exercise)+"/latex/exo"+str(self.__exercise)+"sol.tex", 'w')
+        extex = open(self.__exoDirName+"/"+"ex"+str(self.__exercise)+"/latex/exo.tex", 'w')
+        soltex = open(self.__exoDirName+"/"+"ex"+str(self.__exercise)+"/latex/exosol.tex", 'w')
         extex.write("\exercice{}\n")
         extex.write("voir le site \cite{WEBT} et \cite{T03}")
         soltex.write("\exercice{}\n")
@@ -166,7 +166,7 @@ class SMS:
             serie.write(r'\setcounter{section}{'+number+'}\n')
             serie.write(r'\addtocounter{section}{-1}'+'\n')
             serie.write(r'\renewcommand{\includepath}{\compilationpath/'+self.__exoDirName+'/ex'+number+'/latex/ressources}'+'\n')
-            exo = open(self.__exoDirName+"/"+"ex"+number+"/latex/exo"+number+".tex", 'r')
+            exo = open(self.__exoDirName+"/"+"ex"+number+"/latex/exo.tex", 'r')
             for line in exo:
                 serie.write(line)
 
@@ -186,7 +186,7 @@ class SMS:
             solution.write(r'\setcounter{section}{'+number+'}\n')
             solution.write(r'\addtocounter{section}{-1}'+'\n')
             solution.write(r'\renewcommand{\includepath}{\compilationpath/'+self.__exoDirName+'/ex'+number+'/latex/ressources}'+'\n')
-            exo = open(self.__exoDirName+"/"+"ex"+number+"/latex/exo"+number+"sol.tex", 'r')
+            exo = open(self.__exoDirName+"/"+"ex"+number+"/latex/exosol.tex", 'r')
             for line in exo:
                 solution.write(line)
 
@@ -308,12 +308,12 @@ class SMS:
                 number = exo[2:]
                 catalogue.write(r'\section*{Exercise '+number+'}'+"\n")
                 catalogue.write(r'\renewcommand{\includepath}{\compilationpath/'+self.__exoDirName+'/ex'+number+'/latex/resources}'+'\n')
-                exo = open(os.path.join(os.path.join(self.__exoDirName, "ex"+number),"latex/exo"+number+".tex"), 'r')
+                exo = open(os.path.join(os.path.join(self.__exoDirName, "ex"+number),"latex/exo.tex"), 'r')
                 for line in exo:
                     catalogue.write(line)
                 exo.close()
                 catalogue.write(r'\renewcommand{\includepath}{\compilationpath/'+self.__exoDirName+'/ex'+number+'/latex/resources}'+'\n')
-                solution = open(os.path.join(os.path.join(self.__exoDirName, "ex"+number),"latex/exo"+number+"sol.tex"), 'r')
+                solution = open(os.path.join(os.path.join(self.__exoDirName, "ex"+number),"latex/exosol.tex"), 'r')
                 for line in solution:
                     catalogue.write(line)
                 solution.close()

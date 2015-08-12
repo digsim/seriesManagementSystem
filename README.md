@@ -89,8 +89,8 @@ By default the folder containing all exercises is Exercices. For the system to w
     
     Exercices/ex1/latex:
     total 16
-    -rw-r--r--  1 ruppena  staff   1.0K Mar  3 14:04 exo1.tex
-    -rw-r--r--  1 ruppena  staff    66B Feb 10 12:22 exo1sol.tex
+    -rw-r--r--  1 ruppena  staff   1.0K Mar  3 14:04 exo.tex
+    -rw-r--r--  1 ruppena  staff    66B Feb 10 12:22 exosol.tex
     drwxr-xr-x  4 ruppena  staff   136B Feb 10 12:22 resources/
     
     Exercices/ex1/latex/resources:
@@ -110,7 +110,7 @@ Each exercise is made of two folders: code containing additional material to be 
     
 Additional material to be distributed in zipped form with the series needs to be placed in a subfolder code/donnee whereas distributed material to be distributed with the solution needs to be placed in a subfolder code/solution.
 
-The exercise latex code is in a file ex[number].tex where number must be the same as used in the folder containing the exercise. The same applies for the solution, which is written in a file called exo[number]sol.tex. 
+The exercise latex code is in a file ex.tex where number must be the same as used in the folder containing the exercise. The same applies for the solution, which is written in a file called exosol.tex. 
 
 Resources used for the latex code are stored in a subfolder resources. This folder contains a folder, figures to store images which are included with
 
