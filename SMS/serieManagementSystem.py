@@ -332,6 +332,9 @@ class SMS:
         catalogue.close()
         outputDir = "Catalogue"
         Utils.doLatex(afile, outputDir, True)
+        basename = os.path.split(afile)[1].split(".")[0]
+        shutil.move(os.path.join(outputDir, basename+".pdf"), basename+".pdf")
+        shutil.rmtree(outputDir)
 
     def previewExercice(self):
         self.__serie = 0
