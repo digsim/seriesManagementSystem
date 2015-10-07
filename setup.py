@@ -35,7 +35,7 @@ def read(fname):
 
 setup(
     name="seriesManagementSystem",
-    version="1.1.3",
+    version="1.1.4",
     author="Andreas Ruppen",
     author_email="andreas.ruppen@gmail.com",
     description="Manages Series",
