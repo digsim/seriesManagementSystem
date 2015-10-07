@@ -20,7 +20,7 @@ cmdclass = {'install_data': install_data}
 data_files = [('/etc/SeriesManagementSystem/', ['etc/logging.conf']), ('/usr/local/etc/bash_completion.d/', ['etc/serieManagementSystem-completion.bash'])]
 package_data = {'SMS': [] + walk_subpkg('data/')}
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
-install_reqs = parse_requirements('requirements.txt')
+install_reqs = parse_requirements('requirements.txt', session=False)
 reqs = [str(ir.req) for ir in install_reqs]
 
 
@@ -35,7 +35,7 @@ def read(fname):
 
 setup(
     name="seriesManagementSystem",
-    version="1.1.2",
+    version="1.1.3",
     author="Andreas Ruppen",
     author_email="andreas.ruppen@gmail.com",
     description="Manages Series",
