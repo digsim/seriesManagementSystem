@@ -35,7 +35,7 @@ _seriesManagementSystem()
            return 0
            ;;
        -e)
-           local addopts=`ls Exercises/ |awk -F "ex" '{print $2}'| sed -e 's/\^\[\[0m\$//g'| sort -g | sed -r 's/\x1B\[([0-9]{1,2}(;[0-9]{1,2})?)?[m|K]//g' `
+           local addopts=`ls Exercices/ |awk -F "ex" '{print $2}'| sed 's:/$::' |sort -g`
            COMPREPLY=( $(compgen -W "${addopts}" -- ${cur}) ) 
            return 0
            ;;
