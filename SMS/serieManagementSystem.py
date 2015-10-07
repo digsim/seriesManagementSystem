@@ -379,24 +379,24 @@ class SMS:
 
     def usage(self):
         print ('Usage:')
-        print (os.path.basename(sys.argv[0])+' [option] <command>') #sys.argv[0]
+        print (os.path.basename(sys.argv[0])+' <command> [option]') #sys.argv[0]
         print ('\033[1;33mWhere option is one of:\033[0m')
         print ('    -e for specifying an exercise')
         print ('    -s for specifying a serie')
-        print ('    -u for updating/or not last visited date in bibtex')
-        print ('    -k for keeping/or not unzipped files')
+        print ('    -u for updating last visited date in bibtex')
+        print ('    -k for keeping unzipped files')
         print ('    -t for keeping temporary files in /tmp')
         print ('    -z for doing a zip file')
         print ('    -l lecture name')
         print ('\033[1;33mWhere command is one of:\033[0m')
-        print ('    make-new-exercise.........................Creates a new exercise structure')
-        print ('    build-serie (-s option mandatory).........Builds all for the specified serie and packs it for moodle')
-        print ('    build-all-series..........................Builds all available series and packs them for moodle')
-        print ('    make-workbook.............................Creates one big pdf wich contains all concatenated series')
-        print ('    make-catalogue............................Creates a pdf containing all exercices')
-        print ('    preview-exercise (-e option mandatory)....Previews the specified exercise')
-        print ('    preview-solution (-e option mandatory)....Previews the solution for the specified exercise')
-        print ('    make-new-lecture..........................Creates the directory structure for a new Lecture')
+        print ('    --make-new-exercise.........................Creates a new exercise structure')
+        print ('    --build-serie (-s option mandatory).........Builds all for the specified serie')
+        print ('    --build-all-series..........................Builds all available series with their solutions')
+        print ('    --make-workbook.............................Creates one big PDF containig all concatenated series')
+        print ('    --make-catalogue............................Creates a PDF containing all exercices and their solutions')
+        print ('    --preview-exercise (-e option mandatory)....Previews the specified exercise')
+        print ('    --preview-solution (-e option mandatory)....Previews the solution for the specified exercise')
+        print ('    --make-new-lecture (-l option mandatory)....Creates the directory structure for a new Lecture')
 
 
     def getArguments(self, argv):
