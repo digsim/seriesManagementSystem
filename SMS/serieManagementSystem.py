@@ -153,7 +153,7 @@ class SMS:
         self.__addCodeDonne(numbers.split(","))
         self.__addCodeSolution(numbers.split(","))
 
-        Utils.cleanTempFiles([])
+        Utils.cleanTempFiles(self.__keepTempFiles)
 
     def __doCreateSerie(self, _titles, _numbers, _outputDir, filename = None):
         filename = filename or "serie"+str(self.__serie)
