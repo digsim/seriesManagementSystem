@@ -261,7 +261,7 @@ class SMS:
         else:
             subprocess.call(["gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=workbook.pdf "+outputDir+"/*.pdf"], shell=True, cwd="./", stdout=DEVNULL, stderr=STDOUT)
         shutil.rmtree(self.__smscmoodleOutputDir)
-        Utils.cleanTempFiles([])
+        Utils.cleanTempFiles(self.__keepTempFiles)
 
 
     def __makeWorkBookTitlePage(self, _outputDir):
