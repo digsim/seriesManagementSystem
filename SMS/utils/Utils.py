@@ -126,8 +126,8 @@ def doCheckInstall():
 
 def doLatex(texFile,  outputDir,  doBibTex=False):
     log.info("Running latex in %s on file %s", outputDir, texFile)
-    log.debug("LaTeX command is: latexmk -pdf -silent -bibtex- -outdir={:s} {:s}".format(outputDir,  texFile))
-    status = subprocess.call(["latexmk", "-pdf",  "-silent",  "-bibtex-", "-outdir="+outputDir,   texFile], cwd="./", stdout=DEVNULL, stderr=STDOUT)
+    log.debug("LaTeX command is: latexmk -pdf -silent -outdir={:s} {:s}".format(outputDir,  texFile))
+    status = subprocess.call(["latexmk", "-pdf",  "-silent",  "-outdir="+outputDir,   texFile], cwd="./", stdout=DEVNULL, stderr=STDOUT)
     log.info("Compilation succeded "+texFile)
     # Alternatively use latexmk -c -jobname=texFile plus remove the *.tex file
     tmpfiles = os.listdir(outputDir);
