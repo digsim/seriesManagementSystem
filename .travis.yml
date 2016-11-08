@@ -1,18 +1,18 @@
 language: python
 python:
-  - "2.6"
-  - "2.7"
-  - "3.3"
-  - "3.4"
+- '2.6'
+- '2.7'
+- '3.3'
+- '3.4'
 install:
-  - pip install tox
+- pip install tox
 script:
-  - tox -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d . | sed -e 's/pypypy/pypy/')
+- tox -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d . | sed -e 's/pypypy/pypy/')
 notifications:
   slack:
-    on_success: always
+    secure: Ja4f68W4AiUybnCIQTyWpcI6Ym6vFgal+bdCll3nxYxUK+GyPZP8yl8wQDf4114OQrUNatsE+7N1E/oEgmrauRYcJks2JGURzZb4RZvoyyd7LljwP3PezI2POF7CQ7SuSmTTwh67v7gNoK5mJlN1+nWjZexSXBk7Asai7YdXSfgh0cp9HY/Mkn5yuAphI6NPIr5fEv/bi+66nsR+NsSxpZ6vOtTuEHyIAz56TNL9QeAPiiNdk8VeHyNz3gcv78uf5BJ7x5+4OB7smb1v1jVYVH6PNJ4aPldPe17AjDXnNWzUxVVdg6l5o3cXNKbmBnDvgxVBdo74YH8eCTGgTSFkjXlKvXHctN5oJ/4ejwFO2uTAThvueOxPAr58bM0VaTTYkjQb1D66Y4L/5j1b7d8Phh5gzRse891KXZS29Mxi8+U3ycP4W6fE1pcGldw3rW/FAIYhawdLMI3PycJGAsr/LQYjNLp8t53FLM7M1g9TDdss9Xb8Yur6JmLS/y/w+i/qDis8YU+XqiAaywgL0LC2zElhVHK/YpdbVp5g3T2tcWy7aiC1sEQ9G7RWR79lLyBlRIzTaE+PSq02EHiPPhLrUUmTO14F4tdXOUSmI7s1LKrUM55KHoHt/lUjZzXpza+WNEDiIQ9AYejWFID89xxQWfxyM+i5XDe867LL96EiRaE=
   email:
     recipients:
-      - andreas.ruppen@gmail.com
+    - andreas.ruppen@gmail.com
     on_success: change
     on_failure: always
