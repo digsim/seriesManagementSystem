@@ -1,5 +1,5 @@
 import sys
-from ppic.main.mainImpl import MainImpl
+from seriesmgmtsystem.main.mainImpl import MainImpl
 
 
 def main():

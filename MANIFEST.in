@@ -1,8 +1,8 @@
 include *.py
 include LICENSE
-recursive-include ppic *.ics
-recursive-include ppic *.py
+recursive-include seriesmgmtsystem *.ics
+recursive-include seriesmgmtsystem *.py
 include *.rst *.md tox.ini
 include requirements.txt
-include ppic/etc/*
+include seriesmgmtsystem/etc/*
 recursive-exclude adnitc *.pyc *~

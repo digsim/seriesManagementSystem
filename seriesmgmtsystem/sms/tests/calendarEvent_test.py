@@ -1,5 +1,5 @@
 from unittest import TestCase
-from ppic.itc.calendar2itc import Calendar2ITC
+from seriesmgmtsystem.sms.serieManagementSystem import SMS
 import os
 
 class TestCalendarEvent(TestCase):
@@ -8,7 +8,7 @@ class TestCalendarEvent(TestCase):
         # Like this we can get access to test resources
         cwd = os.path.dirname(os.path.abspath(__file__))
         self.calendarfile = os.path.join(cwd, 'resources/basic.ics')
-        cal = Calendar2ITC()
+        sms = SMS();
         expected="True"
         self.assertEqual("True", expected, 'There are differences')
         
