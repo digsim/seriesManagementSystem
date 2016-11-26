@@ -101,3 +101,13 @@ docs/_build/
 
 # PyBuilder
 target/
+
+test.db
+*~
+tvshows.log
+tvdbdb.db
+.AppleDouble
+.idea
+*.csv
+*.pyc
+files.txt

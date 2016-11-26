@@ -26,6 +26,31 @@
 #   See the License for the specific language governing permissions and                                        #
 #   limitations under the License.                                                                             #
 ################################################################################################################
+
+"""
+Series Management System.
+
+Usage:
+  seriesManagementSystem make-new-exercise | build-all-series | make-workbook | make-catalogue [-uktz]
+  seriesManagementSystem build-serie -sSERIE [-uktz]
+  seriesManagementSystem preview-exercise -eEXERCISE [-uktz]
+  seriesManagementSystem preview-solution -eEXERCISE [-uktz]
+  seriesManagementSystem make-new-lecture -lLECTURE [-uktz]
+  seriesManagementSystem -v | --version
+  seriesManagementSystem -h | --help
+
+
+Options:
+  -h --help     Show this screen.
+  -v --version  Show version.
+  -e --exercise=<exercise>  Specify the exercise to preview.
+  -s --serie=<serie>  Specify the serie to build.
+  -l --lecture=<lecture>  Specify the lecture to create.
+  -u --updatebibtex  for updating last visited date in bibtex
+  -k --keepzipped  for keeping unzipped files
+  -t --keeptemp  for keeping temporary files in /tmp
+  -z --dozip  for doing a zip file
+"""
 import sys
 import os
 import getopt
@@ -37,41 +62,38 @@ if float(sys.version[:3])<3.0:
 else: 
     import configparser as ConfigParser
 import subprocess
+import pkgutil
 from subprocess import STDOUT
 try:
     from subprocess import DEVNULL # py3k
 except ImportError:
     import os
     DEVNULL = open(os.devnull, 'wb')
-from pkg_resources import resource_filename
 from distutils.dir_util import copy_tree
-from os.path import dirname, join, expanduser
-from utils import Utils, ZipUtils
-from utils.LaTeX import *
+from seriesmgmtsystem.utils import Utils, ZipUtils
+from seriesmgmtsystem.utils.LaTeX import *
 
 class SMS:
-    def __init__(self):
+    def __init__(self, updateBibTex, keepUnzipped, keepTemp, doZip, _serie=-1, _exercise=-1):
 
-        self.__INSTALL_DIR = dirname(__file__)
-        self.__CONFIG_DIR = '/etc/SeriesManagementSystem/'
-        logging.basicConfig(level=logging.ERROR)
-        logging.config.fileConfig(
-            [join(self.__CONFIG_DIR, 'logging.conf'), expanduser('~/.logging.conf'), 'logging.conf'])
-        self.__log = logging.getLogger('seriesManagementSystem')
-        
+        self.__log = logging.getLogger('Tube4Droid')
+
         self.__cwd = os.getcwd()
-        self.__keepTempFiles = False
+        self.__keepTempFiles = keepTemp
         
         self.__log.debug("\033[1;33m"+self.__cwd+"\033[0m")
         self.__exoStructure = ["code", "code/donne", "code/solution", "latex", "latex/ressources", "latex/ressources/figures", "latex/ressources/code"]
-
+        self.__DATA_DIR = pkgutil.get_loader('seriesmgmtsystem').get_filename()
+        self.__DATA_DIR = os.path.dirname(self.__DATA_DIR)
+        self.__DATA_DIR = os.path.join(self.__DATA_DIR, 'data')
         smsConfig = ConfigParser.SafeConfigParser()
         self.__log.debug("Reading general configuration from lecture.cfg")
-        smsConfig.read([join(resource_filename(__name__, 'data'), 'lecture.cfg'), "lecture.cfg"])
+        smsConfig.read([join(self.__DATA_DIR, 'lecture.cfg'), "lecture.cfg"])
         self.__smscmoodleOutputDir = smsConfig.get("Config", "moodleOutputDir")
-        self.__smscremoveUnzipped = smsConfig.getboolean("Config", "removeUnzipped")
-        self.__smscdozipfiles = smsConfig.getboolean("Config",  "createZip")
-        self.__smscupdateBibTex = smsConfig.getboolean("Config", "updateBibTex")
+        self.__smscremoveUnzipped = smsConfig.getboolean("Config", "removeUnzipped") if not keepUnzipped else not keepUnzipped
+        self.__smscdozipfiles = smsConfig.getboolean("Config",  "createZip") if not doZip else doZip
+        self.__smscupdateBibTex = smsConfig.getboolean("Config", "updateBibTex") if not updateBibTex else updateBibTex
+        self.__log.info("booleans are: "+str(self.__smscremoveUnzipped)+", "+str(self.__smscdozipfiles)+", "+str(self.__smscupdateBibTex))
         self.__smscopencmd = smsConfig.get("Config", "opencmd")
         self.__smcsdebuglevel = smsConfig.getint("Config", "debugLevel")
         if smsConfig.has_option("Config", "addClearPage"):
@@ -110,8 +132,8 @@ class SMS:
                                     "undefined references.",
                                     "rerun "
                                     )
-        self.__serie = -1
-        self.__exercise = -1
+        self.__serie = _serie
+        self.__exercise = _exercise
         self.__exclude_from_zip = set(['nbproject'])
 
     def createNewExercice(self):
@@ -380,121 +402,13 @@ class SMS:
         copy_tree(resource_filename(__name__, 'data'),
                         lecturename)
 
-    def usage(self):
-        print ('Usage:')
-        print (os.path.basename(sys.argv[0])+' <command> [option]') #sys.argv[0]
-        print ('\033[1;33mWhere option is one of:\033[0m')
-        print ('    -e for specifying an exercise')
-        print ('    -s for specifying a serie')
-        print ('    -u for updating last visited date in bibtex')
-        print ('    -k for keeping unzipped files')
-        print ('    -t for keeping temporary files in /tmp')
-        print ('    -z for doing a zip file')
-        print ('    -l lecture name')
-        print ('\033[1;33mWhere command is one of:\033[0m')
-        print ('    --make-new-exercise.........................Creates a new exercise structure')
-        print ('    --build-serie (-s option mandatory).........Builds all for the specified serie')
-        print ('    --build-all-series..........................Builds all available series with their solutions')
-        print ('    --make-workbook.............................Creates one big PDF containig all concatenated series')
-        print ('    --make-catalogue............................Creates a PDF containing all exercices and their solutions')
-        print ('    --preview-exercise (-e option mandatory)....Previews the specified exercise')
-        print ('    --preview-solution (-e option mandatory)....Previews the solution for the specified exercise')
-        print ('    --make-new-lecture (-l option mandatory)....Creates the directory structure for a new Lecture')
+    def doZip(self):
+        if self.__smscdozipfiles:
+            self.__log.info("Zipping " + self.__smscmoodleOutputDir + " into " + self.__smscmoodleOutputDir + '.zip')
+            ZipUtils.myZip(self.__smscmoodleOutputDir, self.__smscmoodleOutputDir + '.zip', self.__smscmoodleOutputDir)
+            if self.__smscremoveUnzipped:
+                shutil.rmtree(self.__smscmoodleOutputDir)
 
-
-    def getArguments(self, argv):
-        # Parse the command line options
-        if len(argv) == 0:
-            self.usage()
-            sys.exit(3)
-        try:
-            options, args = getopt.getopt(argv, "e:s:huktzl:", ["make-new-lecture", "make-new-exercise", "build-serie", "build-all-series", "make-workbook", "make-catalogue", "preview-exercise", "preview-solution", "--help"])
-        except getopt.GetoptError:
-            self.usage()
-            sys.exit(2)
-        Utils.cleanDSStore("./")
-        Utils.doCheckInstall()
-        self.__log.debug("Parsing options")
-        for option, arg in options:
-            self.__log.debug("Passed options are  %s  and args are %s", option, arg)
-
-            if option in ["-e"]:
-                self.__log.info("Current exercise is: %s", arg)
-                self.__exercise=int(arg)
-            elif option in ["-s"]:
-                self.__log.info("Current serie is: %s", arg)
-                self.__serie=int(arg)
-            if option in ["-u"]:
-                if self.__smscupdateBibTex:
-                    self.__smscupdateBibTex=False
-                else:
-                    self.__log.info("Updating Bibtex Last visited date")
-                    self.__smscupdateBibTex=True
-            if option in ["-k"]:
-                if self.__smscremoveUnzipped:
-                    self.__smscremoveUnzipped = False
-                else:
-                    self.__log.info("Keeping unzipped files")
-                    self.__smscremoveUnzipped = True
-            if option in ["-t"]:
-                self.__keepTempFiles = True
-            if option in ["-z"]:
-                self.__log.info("Will zip the files")
-                self.__smscdozipfiles = True
-            if option in ["-l"]:
-                lecturename = arg
-        self.__log.debug("Parsing arguments")
-        for option, arg in options:
-            self.__log.debug("Passed options are  \"%s\"  and args are \"%s\"", option, arg)
-            if option in ["--make-new-exercise"]:
-                self.__log.info("Creating a new Exercice")
-                self.createNewExercice()
-                break
-            elif option in ["--build-serie"]:
-                if self.__serie == -1:
-                    self.__serie = int(raw_input ("Which serie do you want to build? "))
-                self.__log.info("Building Serie %s", self.__serie)
-                self.buildSerie()
-                if self.__smscdozipfiles:
-                    self.__log.info("Zipping "+self.__smscmoodleOutputDir+str(self.__serie)+" into "+self.__smscmoodleOutputDir+str(self.__serie)+'.zip')
-                    ZipUtils.myZip(self.__smscmoodleOutputDir+str(self.__serie), self.__smscmoodleOutputDir+str(self.__serie)+'.zip', self.__smscmoodleOutputDir+str(self.__serie))
-                    if self.__smscremoveUnzipped:
-                        shutil.rmtree(self.__smscmoodleOutputDir+str(self.__serie))
-                    break
-            elif option in ["--build-all-series"]:
-                self.__log.info("Building All Available Series")
-                self.buildAllSeries()
-                if self.__smscdozipfiles:
-                    self.__log.info("Zipping "+self.__smscmoodleOutputDir+" into "+self.__smscmoodleOutputDir+'.zip')
-                    ZipUtils.myZip(self.__smscmoodleOutputDir, self.__smscmoodleOutputDir+'.zip', self.__smscmoodleOutputDir)
-                    if self.__smscremoveUnzipped:
-                        shutil.rmtree(self.__smscmoodleOutputDir)
-                    break
-            elif option in ["--make-workbook"]:
-                self.__log.info("Building Workbook")
-                self.makeWorkbook()
-                break
-            elif option in ["--make-catalogue"]:
-                self.__log.info("Creating Catalogue of available Exercices")
-                self.makeCatalogue()
-                break
-            elif option in ["--preview-exercise"]:
-                if self.__exercise == -1:
-                    self.__exercise = int(raw_input ("Which exercise do you want to preview? "))
-                self.__log.info("Previewing exercise %s", self.__exercise)
-                self.previewExercice()
-                break
-            elif option in ["--preview-solution"]:
-                if self.__exercise == -1:
-                    self.__exercise = int(raw_input ("Which solution do you want to preview? "))
-                self.__log.info("Previewing solution %s", self.__exercise)
-                self.previewSolution()
-                break
-            elif option in ["--make-new-lecture"]:
-                self.createNewLecture(lecturename)
-            elif option in ["--help", "-h"]:
-                self.usage()
-                break
         
 class checkInstallException(Exception):
     """Used for raising exception during doCheckInstall of SMS class"""
@@ -506,6 +420,4 @@ class checkInstallException(Exception):
         message = message[0:len(message)-2]
         self.missing = message
 
-if __name__ == "__main__":
-    sms = SMS()
-    sms.getArguments(sys.argv[1:])
+

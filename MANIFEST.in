@@ -1,3 +1,8 @@
-include README.md
+include *.py
+include LICENSE
+recursive-include ppic *.ics
+recursive-include ppic *.py
+include *.rst *.md tox.ini
 include requirements.txt
-include etc/*
+include ppic/etc/*
+recursive-exclude adnitc *.pyc *~

@@ -6,19 +6,9 @@ from setuptools import setup, find_packages
 from distutils.command.install_data import install_data
 from pip.req import parse_requirements
 
-def walk_subpkg(name):
-    data_files = []
-    package_dir = 'SMS'
-    for parent, dirs, files in os.walk(os.path.join(package_dir, name)):
-        sub_dir = os.sep.join(parent.split(os.sep)[1:])  # remove package_dir from the path
-        for f in files:
-            data_files.append(os.path.join(sub_dir, f))
-    return data_files
-
 
 cmdclass = {'install_data': install_data}
-data_files = [('/etc/SeriesManagementSystem/', ['etc/logging.conf']), ('/usr/local/etc/bash_completion.d/', ['etc/serieManagementSystem-completion.bash'])]
-package_data = {'SMS': [] + walk_subpkg('data/')}
+data_files = [('/etc/AdNITC/', ['etc/adnitc.conf', 'etc/logging.conf']), ('/usr/local/etc/bash_completion.d/', ['etc/adnitc-completion.bash'])]
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
 install_reqs = parse_requirements('requirements.txt', session=False)
 reqs = [str(ir.req) for ir in install_reqs]
@@ -34,37 +24,39 @@ def read(fname):
 
 
 setup(
-    name="seriesManagementSystem",
-    version="1.1.6",
+    name="seriesmgmtsystem",
+    version="1.0.dev0",
     author="Andreas Ruppen",
     author_email="andreas.ruppen@gmail.com",
     description="Manages Series",
     license="Apache",
     keywords="students series",
     url="https://github.com/digsim/seriesManagementSystem",
-    packages=find_packages(exclude=['contrib', 'docs', 'tests*']),
-    package_data = package_data,
+    packages=find_packages(exclude=['contrib', 'docs', '*.tests*']),
     entry_points={
         'console_scripts': [
-            'seriesManagementSystem=SMS:main',
+            'seriesManagementSystem=seriesmgmtsystem.main:main',
         ],
     },
     cmdclass=cmdclass,
-    data_files=data_files,
+    #data_files=data_files,
+    #package_data = {'etc':'**/*'},
+    include_package_data = True,
     install_requires=reqs,
+    test_suite='nose.collector',
+    tests_require=['nose'],
+    dependency_links=["git+https://github.com/svpino/rfeed.git#egg=rfeed"],
     long_description=read('README.md'),
+    zip_safe=True,
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Environment :: Console",
-        'Intended Audience :: Education',
-        'Intended Audience :: End Users/Desktop',
-        'Intended Audience :: Science/Research',
+        'Intended Audience :: Developers',
         "Topic :: Utilities",
-        'Topic :: Education',
-        'Topic :: Software Development :: Compilers',
         "License :: OSI Approved :: Apache Software License",
         'Operating System :: MacOS :: MacOS X',
         'Operating System :: POSIX',
+        'Operating System :: Microsoft :: Windows',
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.6',
         'Programming Language :: Python :: 2.7',
