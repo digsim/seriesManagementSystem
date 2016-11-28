@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import os
+import sys
 from setuptools import setup, find_packages
 from distutils.command.install_data import install_data
 from pip.req import parse_requirements
@@ -12,7 +13,13 @@ data_files = [('/etc/AdNITC/', ['etc/adnitc.conf', 'etc/logging.conf']), ('/usr/
 # parse_requirements() returns generator of pip.req.InstallRequirement objects
 install_reqs = parse_requirements('requirements.txt', session=False)
 reqs = [str(ir.req) for ir in install_reqs]
+tests_require = ['nose']
 
+if sys.version_info[:2] == (2, 6):
+    # Python unittest2 only needed for Python 2.6
+    tests_require.append('unittest2')
+    # OrderedDict was added in 2.7
+    reqs.append('ordereddict')
 
 
 # Utility function to read the README file.
@@ -32,7 +39,8 @@ setup(
     license="Apache",
     keywords="students series",
     url="https://github.com/digsim/seriesManagementSystem",
-    packages=find_packages(exclude=['contrib', 'docs', '*.tests*']),
+    packages=find_packages('src', exclude=['contrib', 'docs', '*.tests*']),
+    package_dir={'': 'src'},
     entry_points={
         'console_scripts': [
             'seriesManagementSystem=seriesmgmtsystem.main:main',
@@ -44,7 +52,7 @@ setup(
     include_package_data = True,
     install_requires=reqs,
     test_suite='nose.collector',
-    tests_require=['nose'],
+    tests_require=tests_require,
     dependency_links=["git+https://github.com/svpino/rfeed.git#egg=rfeed"],
     long_description=read('README.rst'),
     zip_safe=True,
