@@ -98,6 +98,8 @@ coverage.xml
 
 # Sphinx documentation
 docs/_build/
+docs/presentation
+docs/presentation.tar.bz2
 
 # PyBuilder
 target/

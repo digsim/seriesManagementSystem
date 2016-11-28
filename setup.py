@@ -46,7 +46,7 @@ setup(
     test_suite='nose.collector',
     tests_require=['nose'],
     dependency_links=["git+https://github.com/svpino/rfeed.git#egg=rfeed"],
-    long_description=read('README.md'),
+    long_description=read('README.rst'),
     zip_safe=True,
     classifiers=[
         "Development Status :: 5 - Production/Stable",
