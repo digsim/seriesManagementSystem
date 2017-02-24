@@ -1,18 +1,30 @@
 language: python
 python:
-  - "2.7"
-  - "3.3"
-  - "3.4"
+- '2.7'
+- '3.4'
 install:
-  - pip install tox
-  - pip install -r requirements.txt
+- pip install tox
+- pip install pex
+- pip install -r requirements.txt
 script:
-  - tox -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d . | sed -e 's/pypypy/pypy/')
+- tox -e $(echo py$TRAVIS_PYTHON_VERSION | tr -d . | sed -e 's/pypypy/pypy/')
+- pex . --no-wheel -o dist/seriesmgmt$(echo $TRAVIS_PYTHON_VERSION | tr -d .).pex -e seriesmgmtsystem.main:main --platform=linux-x86_64
+- tox -e docs
 notifications:
   slack:
-    secure: Ja4f68W4AiUybnCIQTyWpcI6Ym6vFgal+bdCll3nxYxUK+GyPZP8yl8wQDf4114OQrUNatsE+7N1E/oEgmrauRYcJks2JGURzZb4RZvoyyd7LljwP3PezI2POF7CQ7SuSmTTwh67v7gNoK5mJlN1+nWjZexSXBk7Asai7YdXSfgh0cp9HY/Mkn5yuAphI6NPIr5fEv/bi+66nsR+NsSxpZ6vOtTuEHyIAz56TNL9QeAPiiNdk8VeHyNz3gcv78uf5BJ7x5+4OB7smb1v1jVYVH6PNJ4aPldPe17AjDXnNWzUxVVdg6l5o3cXNKbmBnDvgxVBdo74YH8eCTGgTSFkjXlKvXHctN5oJ/4ejwFO2uTAThvueOxPAr58bM0VaTTYkjQb1D66Y4L/5j1b7d8Phh5gzRse891KXZS29Mxi8+U3ycP4W6fE1pcGldw3rW/FAIYhawdLMI3PycJGAsr/LQYjNLp8t53FLM7M1g9TDdss9Xb8Yur6JmLS/y/w+i/qDis8YU+XqiAaywgL0LC2zElhVHK/YpdbVp5g3T2tcWy7aiC1sEQ9G7RWR79lLyBlRIzTaE+PSq02EHiPPhLrUUmTO14F4tdXOUSmI7s1LKrUM55KHoHt/lUjZzXpza+WNEDiIQ9AYejWFID89xxQWfxyM+i5XDe867LL96EiRaE=
+    secure: PGoIf/m17cPQAVW/8oIork4qg2uYyLPAGaZ+ral9E3E7E2NTshtnD28YoMWYflBu/W2BFot11h/tgYrcyxRNv8U/5RDezS8lMtwKroc4OxbVI86W20pwuepPsKgovbWXYkmGvsRuzqxiewA3Tqd1g+xAArLOjx3eQ+KQTxTrJHQl1UGZhR8SI3Anhdp7dhlbIUk69QCumtRGGbWJ12oUdU5jm/u0mLz7fnrnu1ytqrRXial6wQ+89WtN5egv9py5YXxXwci3ANWcqgJIUubdOIEgQIlYuwhtum3HQgumbTUE6pX1G8UHuELMaQfDVccCItfW8geaKS3P8syg9sSX3787x6RhDPGTZjaVhMTYIYSOT+aQztIVv6d+RJ53Wdnb/kdnN7T5dt9KK4c9owF5IvA9xhFZEQafJ11hj8C/PBAxadqUKc5rLT/+VKy0FoSwX/zAAIV2j4BrHf8EeyaXh7WEYALbMZofVYWkMZeJANMWP+quvGnPixHCVzlD5S86MCd+zJxXtvXrWZ1n6ts26s7FW/SjnhY8roTKFwqPFqINpIdQd07j4m+5FybV12zt4d+O48/wypLZGfBfdU040PMZbBgVsz46Km1GUUrnJrP8NHTffmktZ9Pk4PT3YeU9LSZ6JvMW0yjnDkg3pYe12W8ggbF79TCVOhJAphOmsWA=
   email:
     recipients:
     - andreas.ruppen@gmail.com
     on_success: change
     on_failure: always
+deploy:
+  provider: releases
+  api_key:
+    secure: "W8jOmiu5FdN1cEajmlEdW7E79Epts6An9BGYtJrQyfwX0/MZKgiKGvO/aY7REEPlLhEcBOmyhQJ5p0CavqcyIdU6Jm9SP2K8j5jRH2O1RAYNTCAH3t8Uv6AchDqIbYIjg5i+0oi10RLOaEbvnN09ZIm0u+lTciVRIqk54+zFUFv72KbCAtfX4LFKqZkdeou3u03NcufEP1mZd+v84ywpezvWqNnLKViV1S7kMlTQ8VqMA3r0c1l7ZaSSsirBp5ZGzziqwHpVy/wz+loVJX7VTUs3bAGrS/ZBn+VqMuflR7etMrftfKwQEgJC8jyQfr8MIYL7U6m+FpJP0DIpssqMga+JMbOmUAzNWqA5gGbUne2Ba7+QPjmW8d4dRaLwCbmUkvlA9kFaOFQTwusyyPoSM2ETcPpEWCQFc3Cwiy9f7Jn6XLfAkVI00pXaklPtZS98LE4A2EkmdXFeX3MVNR6HIU+0JzFOTjGOjOyUn0TLu+PR0wXJIyT8dbYiwplr5JKeKwNe3FMs4kQH25ImRbI+CtBDKqwnHJkuh/seg9Wkb9TucLmrR/pG1tG0Vu0BthS21pE1LiaUmTs5s4++W+HSuBqYj2+cBQK4IOeDEUmiqtRu7GFHe4bMNszbxbSYPwv02ESU1N76tvvPmQfyzgXYuh3kGoq8yAzrqHRiuS+Lu6s="
+  file:
+  - dist/seriesmgmt$(echo $TRAVIS_PYTHON_VERSION | tr -d .).pex
+  skip_cleanup: true
+  on:
+    tags: true
+    all_branches: true
