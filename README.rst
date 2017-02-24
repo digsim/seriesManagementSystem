@@ -1,4 +1,6 @@
-# PPIC
+==========================================================
+SeriesManagementSystem
+==========================================================
 
 The `sms`_  - SeriesManagmentSystem - Is a tool to manage and distributes exercises to students. The exercises
 are prepared indiviually, each with its own resources (like source code) and its solution. From there it is possible

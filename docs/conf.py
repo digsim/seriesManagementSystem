@@ -26,7 +26,7 @@ extensions = [
 source_suffix = '.rst'
 master_doc = 'index'
 
-project = u'AdNITC'
+project = u'SMS'
 this_year = datetime.date.today().year
 copyright = u'{}, Andreas Ruppen'.format(this_year)
 if on_rtd:
