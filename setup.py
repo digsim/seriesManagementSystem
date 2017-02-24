@@ -32,7 +32,7 @@ def read(fname):
 
 setup(
     name="seriesmgmtsystem",
-    version="1.1.7",
+    version='1.1.8.dev0',
     author="Andreas Ruppen",
     author_email="andreas.ruppen@gmail.com",
     description="Manages Series",
