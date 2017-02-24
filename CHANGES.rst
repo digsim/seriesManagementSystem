@@ -1,8 +1,14 @@
 Changelog
 ============
 
-1.0 (unreleased)
+1.1.7 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Adapted to PPIC
+
+- Made Ready for Travis-CI
+
+- Made Read for Readthedocs
+
+- Added initial tests. But we still need more tests.
   
