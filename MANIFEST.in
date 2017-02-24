@@ -1,8 +1,16 @@
 include *.py
 include LICENSE
-recursive-include seriesmgmtsystem *.ics
-recursive-include seriesmgmtsystem *.py
 include *.rst *.md tox.ini
 include requirements.txt
 include seriesmgmtsystem/etc/*
-recursive-exclude adnitc *.pyc *~
+recursive-exclude sms *.pyc *~
+recursive-include docs *.py
+recursive-include docs *.rst
+recursive-include docs Makefile
+recursive-include src *.bash
+recursive-include src *.bib
+recursive-include src *.conf
+recursive-include src *.ics
+recursive-include src *.py
+recursive-include src *.sty
+recursive-include src *.tex
