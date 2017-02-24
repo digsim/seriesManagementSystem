@@ -1,83 +1,62 @@
-# Tube4Droid
+# PPIC
 
-A script to prepare Youtube videos for offline use in any podcatcher software.
+The `sms`_  - SeriesManagmentSystem - Is a tool to manage and distributes exercises to students. The exercises
+are prepared indiviually, each with its own resources (like source code) and its solution. From there it is possible
+to creates series by combining different exercises together on the fly. Such Series can then be compiled to PDF files (plus additional resources which get zipped)
 
-This script downloads the specified youtube playlist (see {{playlist}} property into the directory specified in
-{{mediadir}}. Once all videos downloaded, it creats an RSS feed out of these videos and save the resulting file
-to the {{rssdir}} directory (which can be the same as the mediadir directory. Furhtermore, the script needs to know the
-server uri (see {{serveruri}} property) from where the final RSS feed will be served.
 
-## Installation
+----
 
-## From pip
+    :Homepage: https://github.com/digsim/seriesManagementSystem
+    :Code: https://github.com/digsim/seriesManagementSystem
+    :Mailing list: https://github.com/digsim/seriesManagementSystem
+    :Dependencies: `pytvdbapi`_ `colorama`_ `sqlalchemy`_ `sqlalchemy-utils`_ `six`_ `mysqlclient`_  `progressbar2`_ and `setuptools`_
+    :Compatible with:  2.7 and 3.3+
+    :License: `APACHE`_
 
-Simply run
-```
-pip install missingTVShows
-```
+----
 
-## From Sources
 
-### Final installation
+.. image:: https://travis-ci.org/digsim/seriesManagementSystem.svg?branch=master
+    :target: https://travis-ci.org/digsim/seriesManagementSystem
 
-From a terminal launch
-```
-sudo python setup.py install --record files.txt
-```
-this will compile and install the project to the pyhton libraries (eg. /usr/local/lib/python3.5/site-packages/tube4droid-0.9-py3.5.egg). Furthermore it will install a script in /usr/local/bin/:
-* tube4droid
 
-The basic configuration and logging.conf are copied into /etc/Tube4Droid/. Upon the first start a copy of this directory is created in the user's home directory ~/.Tube4Droid/. From this point on configuration files are read from this location. It is however possible to overwrite them either by placing a file with the same name (but prefixed with a dot eg. .logging.conf) in the user home directory or a file with the same name in the current working directory.
+Roadmap
+=======
 
-### Development installation
+- 2.0: Progress bar,
+- 2.1: More fancy stuff,
 
-from a terminal launch
-```
-sudo python setup.py develop --record files.txt
-```
-does the same as before but, uses links instead of copying files.
 
-### Clean Working directory
+.. _`pytvdbapi`: http://pypi.python.org/pypi/pytvdbapi
+.. _`sms`: https://github.com/digsim/seriesManagementSystem
+.. _`colorama`: https://pypi.python.org/pypi/colorama
+.. _`sqlalchemy`: https://pypi.python.org/pypi/SQLAlchemy
+.. _`sqlalchemy-utils`: http://pypi.python.org/pypi/sqlalchemy-utils
+.. _`mysqlclient`: http://pypi.python.org/pypi/sqlalchemy-utils
+.. _`progressbar2`: http://pypi.python.org/pypi/sqlalchemy-utils
+.. _`six`: http://pythonhosted.org/six/
+.. _`setuptools`: http://pypi.python.org/pypi/setuptools
+.. _`APACHE`: http://www.apache.org/licenses/LICENSE-2.0.txt
 
-To clean the working directory
-```
-sudo python setup.py clean --all
-sudo rm -rf build/ dist/ feedcreator.egg-info/ files.txt
-```
 
-# Uninstall
+Test Coverage Report
+====================
 
-## Method 1
-```
-pip uninstall tube4droid
-```
+Output from coverage test::
 
-## Method 2 (if installed from sources)
-```
-cat files.txt |sudo xargs rm -rf
-```
-## Method 3  (if installed from sources)
-
-First find the installed package with pip and the uninstall it
-```
-✔ ~/Documents/Programming/Python/tube4Android [master|✚ 1]
-19:02 $ pip3 freeze |grep feedcreator
-feedcreator==0.9
-
-✔ ~/Documents/Programming/Python/tube4Android [master|✚ 1]
-19:02 $ sudo pip3 uninstall feedcreator
-Uninstalling feedcreator-0.9:
-  /usr/local/lib/python3.5/site-packages/feedcreator-0.9-py3.5.egg
-Proceed (y/n)? y
-  Successfully uninstalled feedcreator-0.9
-✔ ~/Documents/Programming/Python/tube4Android [master|✚ 2]
-19:03 $
-```
-# Configuration
-
-Upon the first launch, the script creates the ~/.Tube4Droid/ directory containing:
-* logging.conf where the logger is configured
-* tube4droid.conf where the general configuration is stored. Adapt at least the <serveruri>, <mediadir>, <rssdir> and <playlist> properties to get started 
-
-You need a running web server from which the dowloaded files can be saved later on. Therefore, the <mediadir> and <rssdir> properties could point to, for example, {{/var/www/rss/}} whereas  the <serveruri> could be {{http://example.com/rss}} given that the webserver is configured in such a way that this URI point to the {{/var/www/rss}} directory.
-
+    py35 runtests: commands[1] | coverage report
+    Name                                                Stmts   Miss  Cover
+    -----------------------------------------------------------------------
+    src/seriesmgmtsystem/__init__.py                        2      0   100%
+    src/seriesmgmtsystem/main/__init__.py                   5      5     0%
+    src/seriesmgmtsystem/main/main.py                      77     77     0%
+    src/seriesmgmtsystem/main/mainImpl.py                  98     98     0%
+    src/seriesmgmtsystem/sms/__init__.py                    0      0   100%
+    src/seriesmgmtsystem/sms/serieManagementSystem.py     298    221    26%
+    src/seriesmgmtsystem/utils/LaTeX.py                    98     86    12%
+    src/seriesmgmtsystem/utils/Utils.py                   154    135    12%
+    src/seriesmgmtsystem/utils/ZipUtils.py                 55     45    18%
+    src/seriesmgmtsystem/utils/__init__.py                  0      0   100%
+    -----------------------------------------------------------------------
+    TOTAL                                                 787    667    15%
