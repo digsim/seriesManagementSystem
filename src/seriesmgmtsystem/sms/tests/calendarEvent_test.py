@@ -1,6 +1,7 @@
-from unittest import TestCase
-from seriesmgmtsystem.sms.serieManagementSystem import SMS
 import os
+from unittest import TestCase
+
+from seriesmgmtsystem.sms.serieManagementSystem import SMS
 
 class TestCalendarEvent(TestCase):
 
@@ -15,4 +16,3 @@ class TestCalendarEvent(TestCase):
         sms = SMS(updateBibTex, keepUnzipped, keepTemp, doZip);
         expected="True"
         self.assertEqual("True", expected, 'There are differences')
-        

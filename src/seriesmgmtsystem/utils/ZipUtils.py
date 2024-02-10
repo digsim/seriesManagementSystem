@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 ################################################################################################################
 # This script is a simple management system for series made of exercises and solution.                         #
 # It is possible to make zipped series for moodle, a zip containing all series. Furthermore one can            #
@@ -25,13 +22,12 @@
 #   See the License for the specific language governing permissions and                                        #
 #   limitations under the License.                                                                             #
 ################################################################################################################
-
 import logging
 import os
-import zipfile
-import tarfile
-import subprocess
 import shutil
+import subprocess
+import tarfile
+import zipfile
 
 log = logging.getLogger('seriesManagementSystem')
 
@@ -54,13 +50,13 @@ def myZip(directory, destZipFile, zipPrefix="."):
                 theZipArch.write(file, archiveName)
     for root, dirs, files in os.walk(directory):
         zipTreeWalker([zippedDir, directory, zipPrefix], root, files)
-    
+
 
 def myTar(directory, destTarFile, tarPrefix="."):
     """Creates a tar.gz file of a directory to destTarFile"""
     def isSvn(f):
         return f.endswith(".svn")
-    
+
     log.debug("Tar.gz - ing "+directory+" to "+destTarFile+". Using python tar")
     containingFolder = os.path.basename(destTarFile)[:os.path.basename(destTarFile).find(".")]
     tarTempName = "/tmp/tmp.tar.gz"
@@ -73,10 +69,10 @@ def myTar(directory, destTarFile, tarPrefix="."):
     for file in files:
         tarArchive.add(file, containingFolder+"/"+file, exclude=isSvn)
     os.chdir(cwd)
-    if len(tarArchive.getmembers()) == 0: 
+    if len(tarArchive.getmembers()) == 0:
         return
     tarArchive.close()
-    
+
     shutil.move(tarTempName, destTarFile)
     return destTarFile
 
@@ -87,7 +83,6 @@ def sysTar(directory, destTarFile, tarPrefix="."):
     basename = os.path.basename(directory)
     dirname = os.path.dirname(directory)
     os.chdir(os.path.join(cwd, dirname))
-    subprocess.call(["tar -czf "+tarTempName+" --exclude='\.svn' "+basename], shell=True, cwd="./", stdout=open("/dev/stdout", 'w'))
+    subprocess.call(["tar -czf "+tarTempName+r" --exclude='\.svn' "+basename], shell=True, cwd="./", stdout=open("/dev/stdout", 'w'))
     os.chdir(cwd)
     shutil.move(tarTempName, destTarFile)
-        

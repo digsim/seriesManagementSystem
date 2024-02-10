@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 ################################################################################################################
 # This script is a simple management system for series made of exercises and solution.                         #
 # It is possible to make zipped series for moodle, a zip containing all series. Furthermore one can            #
@@ -25,14 +22,14 @@
 #   See the License for the specific language governing permissions and                                        #
 #   limitations under the License.                                                                             #
 ################################################################################################################
-
-import logging
 import configparser as ConfigParser
+import logging
 import os
-from os.path import dirname, join
+from os.path import dirname
+from os.path import join
 
 class LaTeX:
-    
+
     def __init__(self, serie):
         """initialization stuff"""
         smsConfig = ConfigParser.SafeConfigParser()
@@ -96,7 +93,7 @@ class LaTeX:
                 _file.write(r'\item '+title+'\n')
             _file.write(r'\end{itemize}'+'\n')
             _file.write(r'}'+'\n')
-    
+
     def createFooter(self, _file):
         for bib in self.__noCiteList:
             _file.write(r'\nocite{'+bib+'}\n')
@@ -140,4 +137,3 @@ class LaTeX:
         _file.write(r"\centering"+"\n")
         _file.write(r"\includegraphics[height=1.65cm]{\compilationpath/logos/\groupelogo}"+"\n")
         _file.write(r"\end{document}"+"\n")
-        

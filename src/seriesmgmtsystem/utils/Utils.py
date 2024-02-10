@@ -1,6 +1,3 @@
-#!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 ################################################################################################################
 # This script is a simple management system for series made of exercises and solution.                         #
 # It is possible to make zipped series for moodle, a zip containing all series. Furthermore one can            #
@@ -25,15 +22,13 @@
 #   See the License for the specific language governing permissions and                                        #
 #   limitations under the License.                                                                             #
 ################################################################################################################
-
-
+import datetime
 import logging
 import os
 import re
+import shutil
 import subprocess
 import sys
-import datetime
-import shutil
 from subprocess import STDOUT
 try:
     from subprocess import DEVNULL # py3k
@@ -83,7 +78,7 @@ def natsort(list_):
     filteredList = [elem for elem in list_ if not elem.startswith(".")]
     log.debug('Filtered list: '+str(filteredList))
     # decorate
-    tmp = [ (int(re.search('\d+', i).group(0)), i) for i in filteredList ]
+    tmp = [ (int(re.search(r'\d+', i).group(0)), i) for i in filteredList ]
     log.debug('Tmp list: '+str(tmp))
     tmp.sort()
     #   undecorate
@@ -92,7 +87,7 @@ def natsort(list_):
 def doCheckInstall():
     """Verifies if all needed packets are installed"""
     log.info("Checking dependencies")
-    missingProgs = list()
+    missingProgs = []
     try:
         subprocess.check_call("which gs", shell=True, stdout=open("/dev/null", 'w'))
     except subprocess.CalledProcessError as e:
@@ -126,7 +121,7 @@ def doCheckInstall():
 
 def doLatex(texFile,  outputDir,  doBibTex=False):
     log.info("Running latex in %s on file %s", outputDir, texFile)
-    log.debug("LaTeX command is: latexmk -pdf -silent -outdir={:s} {:s}".format(outputDir,  texFile))
+    log.debug(f"LaTeX command is: latexmk -pdf -silent -outdir={outputDir:s} {texFile:s}")
     status = subprocess.call(["latexmk", "-pdf",  "-silent",  "-outdir="+outputDir,   texFile], cwd="./", stdout=DEVNULL, stderr=STDOUT)
     log.info("Compilation succeded "+texFile)
     # Alternatively use latexmk -c -jobname=texFile plus remove the *.tex file
@@ -173,7 +168,7 @@ def doLatex2(texFile, outputDir, doBibTex=False):
         if bibstatus !=0:
             log.error("Compilation error occured. Try executing by hand bibtex "+os.path.join(outputDir,auxFile))
             exit(1)
-        log = open(os.path.join(outputDir, logFile), 'r')
+        log = open(os.path.join(outputDir, logFile))
         for line in log:
             for msg in latex_recompile_messages:
                 if msg in line:
@@ -192,7 +187,7 @@ def doLatex2(texFile, outputDir, doBibTex=False):
 def doUpdateBibTex(bibtexfile, noCiteList):
     """Updates the last visited date of the nocite bibtex items"""
     log.info("Updating BibTex Last visited time stamp")
-    bibtex = open(bibtexfile, 'r')
+    bibtex = open(bibtexfile)
     bibtexnew = open (os.path.join("/tmp/", bibtexfile), 'w')
     start = False
     year = datetime.datetime.now().strftime("%Y")

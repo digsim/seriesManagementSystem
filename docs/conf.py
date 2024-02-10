@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 # icalendar documentation build configuration file
 import datetime
 import os
@@ -26,13 +25,13 @@ extensions = [
 source_suffix = '.rst'
 master_doc = 'index'
 
-project = u'SMS'
+project = 'SMS'
 this_year = datetime.date.today().year
 copyright = f"{this_year}, Andreas Ruppen"
 if on_rtd:
-    version = '1.1.7'
+    version = '1.1.7'    # noqa: F811
 else:
-    version =  version("seriesManagementSystem")
+    version = version("seriesManagementSystem")
 release = version
 
 exclude_patterns = ['_build', 'lib', 'bin', 'include', 'local']
@@ -41,6 +40,6 @@ pygments_style = 'sphinx'
 htmlhelp_basename = 'seriesManagementSystem'
 
 man_pages = [
-    ('index', 'adnitc', u'adnitc doc',
-     [u'Andreas Ruppen'], 1)
+    ('index', 'adnitc', 'adnitc doc',
+     ['Andreas Ruppen'], 1)
 ]

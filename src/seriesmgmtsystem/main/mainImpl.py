@@ -8,7 +8,8 @@ from os.path import join
 
 from .main import Main
 from seriesmgmtsystem.sms.serieManagementSystem import SMS
-from seriesmgmtsystem.utils import Utils, ZipUtils
+from seriesmgmtsystem.utils import Utils
+from seriesmgmtsystem.utils import ZipUtils
 from seriesmgmtsystem.utils.LaTeX import *
 
 
@@ -20,7 +21,7 @@ class MainImpl(Main):
         self.__configName = 'seriesmgmtsystem.conf'
         self.__logFileName = 'seriesmgmtsystem.log'
 
-        super(MainImpl, self).__init__(self.__configDirName, self.__configName, self.__logFileName)
+        super().__init__(self.__configDirName, self.__configName, self.__logFileName)
         self.__log = logging.getLogger('Tube4Droid')
         #self.__playlist = self.config.get('Config', 'playlist')
 

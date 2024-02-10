@@ -1,6 +1,4 @@
 #!/usr/bin/python
-# -*- coding: utf-8 -*-
-
 ################################################################################################################
 # This script is a simple management system for series made of exercises and solution.                         #
 # It is possible to make zipped series for moodle, a zip containing all series. Furthermore one can            #
@@ -26,7 +24,6 @@
 #   See the License for the specific language governing permissions and                                        #
 #   limitations under the License.                                                                             #
 ################################################################################################################
-
 """
 Series Management System.
 
@@ -51,19 +48,20 @@ Options:
   -t --keeptemp  for keeping temporary files in /tmp
   -z --dozip  for doing a zip file
 """
-import sys
-import os
-import getopt
-import shutil
-import logging.config
-
 import configparser as ConfigParser
-import subprocess
+import getopt
+import logging.config
+import os
 import pkgutil
-from subprocess import STDOUT
-from subprocess import DEVNULL
+import shutil
+import subprocess
+import sys
 from shutil import copytree
-from seriesmgmtsystem.utils import Utils, ZipUtils
+from subprocess import DEVNULL
+from subprocess import STDOUT
+
+from seriesmgmtsystem.utils import Utils
+from seriesmgmtsystem.utils import ZipUtils
 from seriesmgmtsystem.utils.LaTeX import *
 
 class SMS:
@@ -73,7 +71,7 @@ class SMS:
 
         self.__cwd = os.getcwd()
         self.__keepTempFiles = keepTemp
-        
+
         self.__log.debug("\033[1;33m"+self.__cwd+"\033[0m")
         self.__exoStructure = ["code", "code/donne", "code/solution", "latex", "latex/ressources", "latex/ressources/figures", "latex/ressources/code"]
         self.__DATA_DIR = pkgutil.get_loader('seriesmgmtsystem').get_filename()
@@ -127,7 +125,7 @@ class SMS:
                                     )
         self.__serie = _serie
         self.__exercise = _exercise
-        self.__exclude_from_zip = set(['nbproject'])
+        self.__exclude_from_zip = {'nbproject'}
 
     def createNewExercice(self):
         self.__exercise = Utils.nextUnusedExercice(self.__exoDirName)
@@ -138,10 +136,10 @@ class SMS:
             os.mkdir(self.__exoDirName+"/"+"ex"+str(self.__exercise)+"/"+adir)
         extex = open(self.__exoDirName+"/"+"ex"+str(self.__exercise)+"/latex/exo.tex", 'w')
         soltex = open(self.__exoDirName+"/"+"ex"+str(self.__exercise)+"/latex/exosol.tex", 'w')
-        extex.write("\exercice{}\n")
-        extex.write("voir le site \cite{WEBT} et \cite{T03}")
-        soltex.write("\exercice{}\n")
-        soltex.write("voir le site \cite{WEBT} et \cite{T03}")
+        extex.write("\\exercice{}\n")
+        extex.write(r"voir le site \cite{WEBT} et \cite{T03}")
+        soltex.write("\\exercice{}\n")
+        soltex.write(r"voir le site \cite{WEBT} et \cite{T03}")
         extex.close()
         soltex.close()
 
@@ -182,7 +180,7 @@ class SMS:
             serie.write(r'\setcounter{section}{'+number+'}\n')
             serie.write(r'\addtocounter{section}{-1}'+'\n')
             serie.write(r'\renewcommand{\includepath}{\compilationpath/'+self.__exoDirName+'/ex'+number+'/latex/ressources}'+'\n')
-            exo = open(self.__exoDirName+"/"+"ex"+number+"/latex/exo.tex", 'r')
+            exo = open(self.__exoDirName+"/"+"ex"+number+"/latex/exo.tex")
             for line in exo:
                 serie.write(line)
 
@@ -204,7 +202,7 @@ class SMS:
             solution.write(r'\setcounter{section}{'+number+'}\n')
             solution.write(r'\addtocounter{section}{-1}'+'\n')
             solution.write(r'\renewcommand{\includepath}{\compilationpath/'+self.__exoDirName+'/ex'+number+'/latex/ressources}'+'\n')
-            exo = open(self.__exoDirName+"/"+"ex"+number+"/latex/exosol.tex", 'r')
+            exo = open(self.__exoDirName+"/"+"ex"+number+"/latex/exosol.tex")
             for line in exo:
                 solution.write(line)
 
@@ -293,7 +291,7 @@ class SMS:
             titles = seriesConfig.get('Serie', 'titles')
             numbers = seriesConfig.get('Serie', 'exo-numbers')
             serienumber = config.split(".")[0].partition("serie")[2]
-            wbtitle.write(r"\textsf{ \textbf{S{\'e}rie "+serienumber+"}} \dotfill"+"\n")
+            wbtitle.write(r"\textsf{ \textbf{S{\'e}rie "+serienumber+r"}} \dotfill"+"\n")
             for number in numbers.split(","):
                 wbtitle.write(number+"\n")
             wbtitle.write(r"\begin{itemize}"+"\n")
@@ -330,17 +328,17 @@ class SMS:
                 number = exo[2:]
                 catalogue.write(r'\section*{Exercise '+number+'}'+"\n")
                 catalogue.write(r'\renewcommand{\includepath}{\compilationpath/'+self.__exoDirName+'/ex'+number+'/latex/resources}'+'\n')
-                exo = open(os.path.join(os.path.join(self.__exoDirName, "ex"+number),"latex/exo.tex"), 'r')
+                exo = open(os.path.join(os.path.join(self.__exoDirName, "ex"+number),"latex/exo.tex"))
                 for line in exo:
                     catalogue.write(line)
                 exo.close()
                 catalogue.write(r'\renewcommand{\includepath}{\compilationpath/'+self.__exoDirName+'/ex'+number+'/latex/resources}'+'\n')
-                solution = open(os.path.join(os.path.join(self.__exoDirName, "ex"+number),"latex/exosol.tex"), 'r')
+                solution = open(os.path.join(os.path.join(self.__exoDirName, "ex"+number),"latex/exosol.tex"))
                 for line in solution:
                     catalogue.write(line)
                 solution.close()
                 if self.__smscaddClearPage:
-                    catalogue.write("\clearpage")
+                    catalogue.write(r"\clearpage")
 
 
         latex.createFooter(catalogue)
@@ -402,7 +400,7 @@ class SMS:
             if self.__smscremoveUnzipped:
                 shutil.rmtree(self.__smscmoodleOutputDir)
 
-        
+
 class checkInstallException(Exception):
     """Used for raising exception during doCheckInstall of SMS class"""
     def __init__(self, missingProg):
@@ -412,5 +410,3 @@ class checkInstallException(Exception):
             message += "; "
         message = message[0:len(message)-2]
         self.missing = message
-
-
