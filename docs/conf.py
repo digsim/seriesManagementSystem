@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 # icalendar documentation build configuration file
-import pkg_resources
 import datetime
 import os
+from importlib.metadata import version
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
@@ -28,17 +28,17 @@ master_doc = 'index'
 
 project = u'SMS'
 this_year = datetime.date.today().year
-copyright = u'{}, Andreas Ruppen'.format(this_year)
+copyright = f"{this_year}, Andreas Ruppen"
 if on_rtd:
     version = '1.1.7'
 else:
-    version = pkg_resources.require("seriesmgmtsystem")[0].version
+    version =  version("seriesManagementSystem")
 release = version
 
 exclude_patterns = ['_build', 'lib', 'bin', 'include', 'local']
 pygments_style = 'sphinx'
 
-htmlhelp_basename = 'adnitcdoc'
+htmlhelp_basename = 'seriesManagementSystem'
 
 man_pages = [
     ('index', 'adnitc', u'adnitc doc',

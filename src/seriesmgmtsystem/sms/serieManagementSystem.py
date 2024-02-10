@@ -57,19 +57,12 @@ import getopt
 import shutil
 import logging.config
 
-if float(sys.version[:3])<3.0:
-    import ConfigParser
-else: 
-    import configparser as ConfigParser
+import configparser as ConfigParser
 import subprocess
 import pkgutil
 from subprocess import STDOUT
-try:
-    from subprocess import DEVNULL # py3k
-except ImportError:
-    import os
-    DEVNULL = open(os.devnull, 'wb')
-from distutils.dir_util import copy_tree
+from subprocess import DEVNULL
+from shutil import copytree
 from seriesmgmtsystem.utils import Utils, ZipUtils
 from seriesmgmtsystem.utils.LaTeX import *
 
@@ -399,7 +392,7 @@ class SMS:
         f.write('exo-numbers: 3,1,2\n')
         f.close()
         self.__log.debug(resource_filename(__name__, 'data'))
-        copy_tree(resource_filename(__name__, 'data'),
+        copytree(resource_filename(__name__, 'data'),
                         lecturename)
 
     def doZip(self):

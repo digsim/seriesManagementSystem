@@ -27,12 +27,8 @@
 ################################################################################################################
 
 import logging
-import sys
-if float(sys.version[:3])<3.0:
-    import ConfigParser
-else:
-    import configparser as ConfigParser
-from pkg_resources import resource_filename
+import configparser as ConfigParser
+import os
 from os.path import dirname, join
 
 class LaTeX:
@@ -40,7 +36,10 @@ class LaTeX:
     def __init__(self, serie):
         """initialization stuff"""
         smsConfig = ConfigParser.SafeConfigParser()
-        smsConfig.read([join(resource_filename(__name__, 'data'), 'lecture.cfg'), "lecture.cfg"])
+        config_dir_spec: str = importlib.util.find_spec("seriesmgmtsystem").origin  # type: ignore
+        config_dir_path = os.path.dirname(config_dir_spec)
+        config_dir = self.__pathjoin(config_dir_path, "etc")
+        smsConfig.read([join(config_dir, 'lecture.cfg'), "lecture.cfg"])
 
 
         self.__name = smsConfig.get("Lecture", "name")

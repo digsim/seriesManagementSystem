@@ -1,5 +1,12 @@
-from .main import Main
 import argparse
+import logging
+import random
+import sys
+import time
+import typing
+from os.path import join
+
+from .main import Main
 from seriesmgmtsystem.sms.serieManagementSystem import SMS
 from seriesmgmtsystem.utils import Utils, ZipUtils
 from seriesmgmtsystem.utils.LaTeX import *
@@ -7,7 +14,7 @@ from seriesmgmtsystem.utils.LaTeX import *
 
 class MainImpl(Main):
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Constructor"""
         self.__configDirName = "seriesmgmtsystem"
         self.__configName = 'seriesmgmtsystem.conf'
@@ -21,14 +28,14 @@ class MainImpl(Main):
         self.__args = ''
 
 
-    def getArguments(self, argv):
+    def get_arguments(self, argv: list[typing.Any]) -> None:
         """
         Parses the command line arguments.
 
         :param argv: array of command line arguments
         :return: void
         """
-        self._checkPythonVersion()
+        self._check_python_version()
         parser = argparse.ArgumentParser(prog='seriesManagementSystem',
                                          description='Series Management System.',
                                          epilog='%(prog)s {command} -h for help on individual commands')
@@ -70,8 +77,6 @@ class MainImpl(Main):
         newLectureParser.add_argument('-l', '--lecture', dest='lecture', required=True,
                                       help='Specify the lecture to create')
 
-
-
         if len(sys.argv) == 1:
             parser.print_help()
             sys.exit(1)
@@ -83,7 +88,7 @@ class MainImpl(Main):
 
         sys.exit(0)
 
-    def doWork(self):
+    def do_work(self) -> None:
         """Overwrites the main"""
         Utils.cleanDSStore("./")
         Utils.doCheckInstall()
