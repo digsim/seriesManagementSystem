@@ -32,7 +32,7 @@ class Main:
         self.__configName = configName
         self.__logFileName = logFileName
         self._check_user_config_files()
-        self.version = version("missingTvShows")
+        self.version = version("SeriesManagementSystem")
 
         if os.path.isfile("logging.yaml"):
             logging_config = self.__pathjoin("logging.yaml")

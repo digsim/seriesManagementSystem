@@ -23,10 +23,11 @@
 #   limitations under the License.                                                                             #
 ################################################################################################################
 import configparser as ConfigParser
+import importlib.util
 import logging
 import os
-from os.path import dirname
 from os.path import join
+
 
 class LaTeX:
 
@@ -37,7 +38,6 @@ class LaTeX:
         config_dir_path = os.path.dirname(config_dir_spec)
         config_dir = self.__pathjoin(config_dir_path, "etc")
         smsConfig.read([join(config_dir, 'lecture.cfg'), "lecture.cfg"])
-
 
         self.__name = smsConfig.get("Lecture", "name")
         self.__lecturer = smsConfig.get("Lecture", "lecturer")
@@ -57,83 +57,83 @@ class LaTeX:
         self.__serie = serie
         self.__log = logging.getLogger('seriesManagementSystem')
 
-
     def createHeader(self, _file, titles, isSolution=False):
-        _file.write(r'\documentclass[francais,a4paper]{article}'+"\n")
-        _file.write(r'\usepackage{sms}'+"\n")
-        _file.write(r"\newcommand{\compilationpath}{./}"+"\n")
-        _file.write(r'\newcommand{\prof}{'+self.__lecturer+'}'+"\n")
-        _file.write(r'\newcommand{\course}{'+self.__name+'}'+"\n")
-        _file.write(r'\newcommand{\theyear}{'+self.__year+'}'+"\n")
-        _file.write(r'\newcommand{\exercisetext}{'+self.__exercisetext+'}'+"\n")
+        _file.write(r'\documentclass[francais,a4paper]{article}' + "\n")
+        _file.write(r'\usepackage{sms}' + "\n")
+        _file.write(r"\newcommand{\compilationpath}{./}" + "\n")
+        _file.write(r'\newcommand{\prof}{' + self.__lecturer + '}' + "\n")
+        _file.write(r'\newcommand{\course}{' + self.__name + '}' + "\n")
+        _file.write(r'\newcommand{\theyear}{' + self.__year + '}' + "\n")
+        _file.write(r'\newcommand{\exercisetext}{' + self.__exercisetext + '}' + "\n")
         if isSolution:
             solutionText = self.__solutiontext
         else:
             solutionText = ''
-        _file.write(r'\newcommand{\solutiontext}{'+solutionText+'}'+"\n")
-        _file.write(r'\newcommand{\thecontent} {\sffamily\bfseries '+self.__contenttext+':}'+"\n")
-        _file.write(r'\newcommand{\theheadertitle}{'+self.__headertitle+'}'+"\n")
-        _file.write(r'\newcommand{\unilogo}{'+self.__unilogo+'}'+"\n")
-        _file.write(r'\newcommand{\groupelogo}{'+self.__groupelogo+'}'+"\n")
-        #afile.write(r"\input{\compilationpath/exercicepreamble}"+"\n")
-        _file.write(r"% Number of the serie"+"\n")
-        _file.write(r"\newcommand{\exercisenb}{"+str(self.__serie)+"}"+"\n")
-        _file.write(r"\newcommand{\includepath}{\compilationpath}"+"\n")
-        _file.write(r'\hypersetup{pdftitle={'+self.__pdftitle+'},pdfauthor={'+self.__pdfauthor+'},pdfkeywords={'+self.__pdfkeyword+"}}\n")
-        _file.write(r"\begin{document}"+"\n")
-        _file.write(r"\input{\compilationpath/captionnames}"+"\n")
-        _file.write(r"% Header of the exercise:"+"\n")
-        _file.write(r"\exheader"+"\n")
+        _file.write(r'\newcommand{\solutiontext}{' + solutionText + '}' + "\n")
+        _file.write(
+            r'\newcommand{\thecontent} {\sffamily\bfseries ' + self.__contenttext + ':}' + "\n")
+        _file.write(r'\newcommand{\theheadertitle}{' + self.__headertitle + '}' + "\n")
+        _file.write(r'\newcommand{\unilogo}{' + self.__unilogo + '}' + "\n")
+        _file.write(r'\newcommand{\groupelogo}{' + self.__groupelogo + '}' + "\n")
+        # afile.write(r"\input{\compilationpath/exercicepreamble}"+"\n")
+        _file.write(r"% Number of the serie" + "\n")
+        _file.write(r"\newcommand{\exercisenb}{" + str(self.__serie) + "}" + "\n")
+        _file.write(r"\newcommand{\includepath}{\compilationpath}" + "\n")
+        _file.write(r'\hypersetup{pdftitle={' + self.__pdftitle + '},pdfauthor={' + self.__pdfauthor + '},pdfkeywords={' + self.__pdfkeyword + "}}\n")
+        _file.write(r"\begin{document}" + "\n")
+        _file.write(r"\input{\compilationpath/captionnames}" + "\n")
+        _file.write(r"% Header of the exercise:" + "\n")
+        _file.write(r"\exheader" + "\n")
 
         if len(titles) != 0:
-            _file.write(r"% Content of the exercise, topics"+"\n")
-            _file.write(r"\content{"+"\n")
-            _file.write(r"\begin{itemize}"+"\n")
+            _file.write(r"% Content of the exercise, topics" + "\n")
+            _file.write(r"\content{" + "\n")
+            _file.write(r"\begin{itemize}" + "\n")
             for title in titles:
-                _file.write(r'\item '+title+'\n')
-            _file.write(r'\end{itemize}'+'\n')
-            _file.write(r'}'+'\n')
+                _file.write(r'\item ' + title + '\n')
+            _file.write(r'\end{itemize}' + '\n')
+            _file.write(r'}' + '\n')
 
     def createFooter(self, _file):
         for bib in self.__noCiteList:
-            _file.write(r'\nocite{'+bib+'}\n')
-        _file.write(r'\bibliography{bibdb}'+'\n')
-        _file.write(r'\bibliographystyle{plain}'+'\n')
-        _file.write(r'\end{document}'+'\n')
-
-
+            _file.write(r'\nocite{' + bib + '}\n')
+        _file.write(r'\bibliography{bibdb}' + '\n')
+        _file.write(r'\bibliographystyle{plain}' + '\n')
+        _file.write(r'\end{document}' + '\n')
 
     def makeWorkBookTitlePageHeader(self, _file):
-        _file.write(r"\documentclass[francais,a4paper]{article}"+"\n")
-        _file.write(r"\newcommand{\compilationpath}{./}"+"\n")
-        _file.write(r'\newcommand{\groupelogo}{'+self.__groupelogo+'}'+"\n")
-        _file.write(r"\usepackage{graphicx}"+"\n")
-        _file.write(r"\usepackage{palatino}"+"\n")
-        _file.write(r"%\usepackage[french]{babel}"+"\n")
-        _file.write(r"\usepackage[utf8]{inputenc}"+"\n")
-        _file.write(r"\usepackage{ae, pslatex}    % Joli output en PDF"+"\n")
-        _file.write(r"%\usepackage{graphics}          % Manipulation de boîtes et importation de graphismes."+"\n")
-        _file.write(r"%\usepackage[dvips]{graphicx}   %"+"\n")
-        _file.write(r"\usepackage[T1]{fontenc}"+"\n")
-        _file.write(r"\begin{document}"+"\n")
-        _file.write(r"\pagestyle{empty}"+"\n")
-        _file.write(r"\vspace{-1cm}"+"\n")
-        _file.write(r"\begin{center}"+"\n")
-        _file.write(r"\begin{Huge}"+"\n")
-        _file.write(r"{\sf "+self.__name+" }"+"\n")
-        _file.write(r"\end{Huge}"+"\n")
-        _file.write(r"\vspace{0.4cm}%"+"\n")
-        _file.write(r"\begin{huge}"+"\n")
-        _file.write(r"Workbook ("+self.__year+")"+"\n")
-        _file.write(r"\end{huge}"+"\n")
-        _file.write(r"\end{center}"+"\n")
-        _file.write(r"\rule{\linewidth}{1pt}"+"\n")
-        _file.write(r"\vspace{1cm}"+"\n")
+        _file.write(r"\documentclass[francais,a4paper]{article}" + "\n")
+        _file.write(r"\newcommand{\compilationpath}{./}" + "\n")
+        _file.write(r'\newcommand{\groupelogo}{' + self.__groupelogo + '}' + "\n")
+        _file.write(r"\usepackage{graphicx}" + "\n")
+        _file.write(r"\usepackage{palatino}" + "\n")
+        _file.write(r"%\usepackage[french]{babel}" + "\n")
+        _file.write(r"\usepackage[utf8]{inputenc}" + "\n")
+        _file.write(r"\usepackage{ae, pslatex}    % Joli output en PDF" + "\n")
+        _file.write(
+            r"%\usepackage{graphics}          % Manipulation de boîtes et importation de graphismes." + "\n")
+        _file.write(r"%\usepackage[dvips]{graphicx}   %" + "\n")
+        _file.write(r"\usepackage[T1]{fontenc}" + "\n")
+        _file.write(r"\begin{document}" + "\n")
+        _file.write(r"\pagestyle{empty}" + "\n")
+        _file.write(r"\vspace{-1cm}" + "\n")
+        _file.write(r"\begin{center}" + "\n")
+        _file.write(r"\begin{Huge}" + "\n")
+        _file.write(r"{\sf " + self.__name + " }" + "\n")
+        _file.write(r"\end{Huge}" + "\n")
+        _file.write(r"\vspace{0.4cm}%" + "\n")
+        _file.write(r"\begin{huge}" + "\n")
+        _file.write(r"Workbook (" + self.__year + ")" + "\n")
+        _file.write(r"\end{huge}" + "\n")
+        _file.write(r"\end{center}" + "\n")
+        _file.write(r"\rule{\linewidth}{1pt}" + "\n")
+        _file.write(r"\vspace{1cm}" + "\n")
 
     def printWorkBookTitlePageFooter(self, _file):
-        _file.write(r"%\end{itemize}"+"\n")
-        _file.write(r"\rule{\linewidth}{1pt}"+"\n")
-        _file.write(r"\vfill"+"\n")
-        _file.write(r"\centering"+"\n")
-        _file.write(r"\includegraphics[height=1.65cm]{\compilationpath/logos/\groupelogo}"+"\n")
-        _file.write(r"\end{document}"+"\n")
+        _file.write(r"%\end{itemize}" + "\n")
+        _file.write(r"\rule{\linewidth}{1pt}" + "\n")
+        _file.write(r"\vfill" + "\n")
+        _file.write(r"\centering" + "\n")
+        _file.write(
+            r"\includegraphics[height=1.65cm]{\compilationpath/logos/\groupelogo}" + "\n")
+        _file.write(r"\end{document}" + "\n")
