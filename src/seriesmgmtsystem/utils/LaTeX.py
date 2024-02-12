@@ -31,7 +31,7 @@ from os.path import join
 
 class LaTeX:
 
-    def __init__(self, serie):
+    def __init__(self, serie) -> None:
         """initialization stuff"""
         smsConfig = ConfigParser.SafeConfigParser()
         config_dir_spec: str = importlib.util.find_spec("seriesmgmtsystem").origin  # type: ignore

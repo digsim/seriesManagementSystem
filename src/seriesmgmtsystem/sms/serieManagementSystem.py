@@ -64,7 +64,7 @@ from seriesmgmtsystem.utils.LaTeX import LaTeX
 
 
 class SMS:
-    def __init__(self, updateBibTex, keepUnzipped, keepTemp, doZip, _serie=-1, _exercise=-1):
+    def __init__(self, updateBibTex: bool, keepUnzipped: bool, keepTemp: bool, doZip: bool, _serie: int=1, _exercise: int=-1) -> None:
 
         self.__log = logging.getLogger('Tube4Droid')
 

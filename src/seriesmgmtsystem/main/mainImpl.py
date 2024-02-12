@@ -143,4 +143,4 @@ class MainImpl(Main):
 
 if __name__ == "__main__":
     main = MainImpl()
-    main.getArguments(sys.argv[1:])
+    main.get_arguments(sys.argv[1:])
