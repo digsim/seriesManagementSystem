@@ -30,11 +30,7 @@ import shutil
 import subprocess
 import sys
 from subprocess import STDOUT
-try:
-    from subprocess import DEVNULL  # py3k
-except ImportError:
-    import os
-    DEVNULL = open(os.devnull, 'wb')
+from subprocess import DEVNULL
 
 log = logging.getLogger('seriesManagementSystem')
 
@@ -121,8 +117,7 @@ def doCheckInstall():
         if len(missingProgs) != 0:
             raise Exception(missingProgs)
     except Exception as x:
-        log.error("Please ensure that the needed utilities (" +
-                  x.missing + ") are installed and on the $PATH")
+        log.error("Please ensure that the needed utilities (" + x.missing + ") are installed and on the $PATH")
         sys.exit(-1)
 
 
@@ -130,8 +125,7 @@ def doLatex(texFile, outputDir, doBibTex=False):
     log.info("Running latex in %s on file %s", outputDir, texFile)
     log.debug(
         f"LaTeX command is: latexmk -pdf -silent -outdir={outputDir:s} {texFile:s}")
-    status = subprocess.call(["latexmk", "-pdf", "-silent", "-outdir=" +
-                             outputDir, texFile], cwd="./", stdout=DEVNULL, stderr=STDOUT)
+    subprocess.call(["latexmk", "-pdf", "-silent", "-outdir=" + outputDir, texFile], cwd="./", stdout=DEVNULL, stderr=STDOUT)
     log.info("Compilation succeded " + texFile)
     # Alternatively use latexmk -c -jobname=texFile plus remove the *.tex file
     tmpfiles = os.listdir(outputDir)
@@ -144,10 +138,9 @@ def doLatex(texFile, outputDir, doBibTex=False):
 
 def doLatex2(texFile, outputDir, doBibTex=False):
     log.info("Running latex in %s on file %s", outputDir, texFile)
-    log.debug("LaTeX command is: pdflatex -output-directory=" +
-              outputDir + " " + texFile)
+    log.debug("LaTeX command is: pdflatex -output-directory=" + outputDir + " " + texFile)
     # Genral settings for latex copmiling
-    latex_error_messages = (
+    latex_error_messages = (   # noqa: F841
         "Type X to quit or <RETURN> to proceed",
         "! Undefined control sequence.",
         "? ",
@@ -176,12 +169,10 @@ def doLatex2(texFile, outputDir, doBibTex=False):
         else:
             bibstatus = 0
         if status != 0:
-            log.error("Compilation error occured. Try executing by hand pdflatex -output-directory=" +
-                      outputDir + " -halt-on-error " + texFile)
+            log.error("Compilation error occured. Try executing by hand pdflatex -output-directory=" + outputDir + " -halt-on-error " + texFile)
             exit(1)
         if bibstatus != 0:
-            log.error("Compilation error occured. Try executing by hand bibtex " +
-                      os.path.join(outputDir, auxFile))
+            log.error("Compilation error occured. Try executing by hand bibtex " + os.path.join(outputDir, auxFile))
             exit(1)
         log = open(os.path.join(outputDir, logFile))
         for line in log:
