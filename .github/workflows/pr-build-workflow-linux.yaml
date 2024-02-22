@@ -1,0 +1,67 @@
+name: PR Linxu Build
+
+permissions:
+  contents: write
+  packages: write
+  issues: read
+  checks: write
+  pull-requests: write
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  build:
+    name: test with ${{ matrix.py }} on linux
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        py:
+          - "3.12"
+          - "3.11"
+          - "3.10"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup python for test ${{ matrix.py }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.py }}
+
+      - name: Install tox and pex dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pex tox tox-gh
+
+      - name: Check pypi versions
+        uses: maybe-hello-world/pyproject-check-version@v4
+        id: versioncheck
+        with:
+          pyproject-path: "./pyproject.toml"
+          test-regex: "[0-9]+.[0-9]+.[0-9]+dev[0-9]+"
+
+      - name: Build Software
+        run: |
+          tox
+
+      - name: Build documentation
+        run: |
+          tox -e docs
+
+      - name: Build distributable packages
+        run: |
+          tox -e package
+        env:
+          PACKAGE_VERSION: ${{ steps.versioncheck.outputs.local_version }}
+
+      - name: Verify pex package is runnable
+        run: ./dist/seriesmgmt_${{ steps.versioncheck.outputs.local_version }}.pex
+
+      - name: Verify package is runnable
+        run: |
+          pip install -e .
+          python scripts/test.py -h
