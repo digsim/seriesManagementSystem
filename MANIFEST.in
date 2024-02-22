@@ -12,6 +12,10 @@ recursive-include src *.py
 recursive-include src *.yaml
 recursive-include scripts *.py
 
+recursive-include src *.bib
+recursive-include src *.sty
+recursive-include src *.tex
+
 include *.rst *.md tox.ini
 include requirements.txt
 exclude .pre-commit-config.yaml
