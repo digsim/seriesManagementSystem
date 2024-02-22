@@ -20,7 +20,7 @@ class MainImpl(Main):
         self.__log = logging.getLogger('Tube4Droid')
         # self.__playlist = self.config.get('Config', 'playlist')
 
-        self.__args = ''
+        self.__args = argparse.Namespace()
 
     def get_arguments(self, argv: list[typing.Any]) -> None:
         """

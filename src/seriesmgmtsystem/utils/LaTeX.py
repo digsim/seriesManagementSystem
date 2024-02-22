@@ -22,22 +22,22 @@
 #   See the License for the specific language governing permissions and                                        #
 #   limitations under the License.                                                                             #
 ################################################################################################################
-import configparser as ConfigParser
+import configparser
 import importlib.util
 import logging
 import os
-from os.path import join
+from io import TextIOWrapper
 
 
 class LaTeX:
 
-    def __init__(self, serie) -> None:
+    def __init__(self, serie: int) -> None:
         """initialization stuff"""
-        smsConfig = ConfigParser.SafeConfigParser()
+        smsConfig = configparser.ConfigParser()
         config_dir_spec: str = importlib.util.find_spec("seriesmgmtsystem").origin  # type: ignore
         config_dir_path = os.path.dirname(config_dir_spec)
-        config_dir = self.__pathjoin(config_dir_path, "etc")
-        smsConfig.read([join(config_dir, 'lecture.cfg'), "lecture.cfg"])
+        config_dir = os.path.join(config_dir_path, "etc")
+        smsConfig.read([os.path.join(config_dir, 'lecture.cfg'), "lecture.cfg"])
 
         self.__name = smsConfig.get("Lecture", "name")
         self.__lecturer = smsConfig.get("Lecture", "lecturer")
@@ -57,7 +57,7 @@ class LaTeX:
         self.__serie = serie
         self.__log = logging.getLogger('seriesManagementSystem')
 
-    def createHeader(self, _file, titles, isSolution=False):
+    def createHeader(self, _file: TextIOWrapper, titles: list[str], isSolution: bool = False) -> None:
         _file.write(r'\documentclass[francais,a4paper]{article}' + "\n")
         _file.write(r'\usepackage{sms}' + "\n")
         _file.write(r"\newcommand{\compilationpath}{./}" + "\n")
@@ -94,14 +94,14 @@ class LaTeX:
             _file.write(r'\end{itemize}' + '\n')
             _file.write(r'}' + '\n')
 
-    def createFooter(self, _file):
+    def createFooter(self, _file: TextIOWrapper) -> None:
         for bib in self.__noCiteList:
             _file.write(r'\nocite{' + bib + '}\n')
         _file.write(r'\bibliography{bibdb}' + '\n')
         _file.write(r'\bibliographystyle{plain}' + '\n')
         _file.write(r'\end{document}' + '\n')
 
-    def makeWorkBookTitlePageHeader(self, _file):
+    def makeWorkBookTitlePageHeader(self, _file: TextIOWrapper) -> None:
         _file.write(r"\documentclass[francais,a4paper]{article}" + "\n")
         _file.write(r"\newcommand{\compilationpath}{./}" + "\n")
         _file.write(r'\newcommand{\groupelogo}{' + self.__groupelogo + '}' + "\n")
@@ -129,7 +129,7 @@ class LaTeX:
         _file.write(r"\rule{\linewidth}{1pt}" + "\n")
         _file.write(r"\vspace{1cm}" + "\n")
 
-    def printWorkBookTitlePageFooter(self, _file):
+    def printWorkBookTitlePageFooter(self, _file: TextIOWrapper) -> None:
         _file.write(r"%\end{itemize}" + "\n")
         _file.write(r"\rule{\linewidth}{1pt}" + "\n")
         _file.write(r"\vfill" + "\n")

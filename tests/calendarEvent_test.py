@@ -6,9 +6,9 @@ from seriesmgmtsystem.sms.serieManagementSystem import SMS
 
 class TestCalendarEvent(TestCase):
 
-    def test_JSON(self):
+    def test_JSON(self) -> None:
         # Like this we can get access to test resources
-        cwd = os.path.dirname(os.path.abspath(__file__))
+        os.path.dirname(os.path.abspath(__file__))
         updateBibTex = False
         keepUnzipped = False
         keepTemp = False

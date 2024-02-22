@@ -29,24 +29,24 @@ import re
 import shutil
 import subprocess
 import sys
-from subprocess import STDOUT
 from subprocess import DEVNULL
+from subprocess import STDOUT
 
 log = logging.getLogger('seriesManagementSystem')
 
 
-def cleanDSStore(dir):
-    def cleaner(currdir, dirs, files):
+def cleanDSStore(dir: str) -> None:
+    def cleaner(currdir: str, dirs: list[str], files: list[str]) -> None:
         for item in files:
             if (item.find("DS_Store") != -1):
                 log.debug("removing " + currdir + "/" + item)
                 os.remove(os.path.join(currdir, item))
-    for root, dirs, files in os.walk("./"):
+    for root, dirs, files in os.walk(dir):
         # self.cleanDSStore(root, dirs, files)
         cleaner(root, dirs, files)
 
 
-def cleanTempFiles(keepTempFiles):
+def cleanTempFiles(keepTempFiles: bool) -> None:
     if keepTempFiles:
         return
     log.info("Removing temp files")
@@ -58,7 +58,7 @@ def cleanTempFiles(keepTempFiles):
             os.remove('/tmp/' + file)
 
 
-def nextUnusedExercice(dir):
+def nextUnusedExercice(dir: str) -> int:
     lastExo = 0
     dirs = os.listdir(dir)
     # dirs.sort()
@@ -71,19 +71,19 @@ def nextUnusedExercice(dir):
     return lastExo
 
 
-def natsort(list_):
+def natsort(list_: list[str]) -> list[str]:
     log.debug("Will filter the list " + str(list_))
     filteredList = [elem for elem in list_ if not elem.startswith(".")]
     log.debug('Filtered list: ' + str(filteredList))
     # decorate
-    tmp = [(int(re.search(r'\d+', i).group(0)), i) for i in filteredList]
+    tmp = [(int(re.search(r'\d+', i).group(0)), i) for i in filteredList]  # type: ignore
     log.debug('Tmp list: ' + str(tmp))
     tmp.sort()
     #   undecorate
     return [i[1] for i in tmp]
 
 
-def doCheckInstall():
+def doCheckInstall() -> None:
     """Verifies if all needed packets are installed"""
     log.info("Checking dependencies")
     missingProgs = []
@@ -117,11 +117,11 @@ def doCheckInstall():
         if len(missingProgs) != 0:
             raise Exception(missingProgs)
     except Exception as x:
-        log.error("Please ensure that the needed utilities (" + x.missing + ") are installed and on the $PATH")
+        log.error("Please ensure that the needed utilities (" + str(missingProgs) + ") are installed and on the $PATH")
         sys.exit(-1)
 
 
-def doLatex(texFile, outputDir, doBibTex=False):
+def doLatex(texFile: str, outputDir: str, doBibTex: bool = False) -> None:
     log.info("Running latex in %s on file %s", outputDir, texFile)
     log.debug(
         f"LaTeX command is: latexmk -pdf -silent -outdir={outputDir:s} {texFile:s}")
@@ -136,7 +136,7 @@ def doLatex(texFile, outputDir, doBibTex=False):
             os.remove(os.path.join(outputDir, file))
 
 
-def doLatex2(texFile, outputDir, doBibTex=False):
+def doLatex2(texFile: str, outputDir: str, doBibTex: bool = False) -> None:
     log.info("Running latex in %s on file %s", outputDir, texFile)
     log.debug("LaTeX command is: pdflatex -output-directory=" + outputDir + " " + texFile)
     # Genral settings for latex copmiling
@@ -174,14 +174,14 @@ def doLatex2(texFile, outputDir, doBibTex=False):
         if bibstatus != 0:
             log.error("Compilation error occured. Try executing by hand bibtex " + os.path.join(outputDir, auxFile))
             exit(1)
-        log = open(os.path.join(outputDir, logFile))
-        for line in log:
+        logfile = open(os.path.join(outputDir, logFile))
+        for line in logfile:
             for msg in latex_recompile_messages:
                 if msg in line:
                     recompile = True
                     log.info("Need to recompile " + texFile)
                     break
-        log.close()
+        logfile.close()
     log.info("Compilation succeded " + texFile)
     tmpfiles = os.listdir(outputDir)
     tmpfiles.sort()
@@ -191,7 +191,7 @@ def doLatex2(texFile, outputDir, doBibTex=False):
             os.remove(os.path.join(outputDir, file))
 
 
-def doUpdateBibTex(bibtexfile, noCiteList):
+def doUpdateBibTex(bibtexfile: str, noCiteList: list[str]) -> None:
     """Updates the last visited date of the nocite bibtex items"""
     log.info("Updating BibTex Last visited time stamp")
     bibtex = open(bibtexfile)
