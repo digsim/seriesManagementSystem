@@ -116,7 +116,7 @@ def doCheckInstall() -> None:
     try:
         if len(missingProgs) != 0:
             raise Exception(missingProgs)
-    except Exception as x:
+    except Exception:
         log.error("Please ensure that the needed utilities (" + str(missingProgs) + ") are installed and on the $PATH")
         sys.exit(-1)
 
