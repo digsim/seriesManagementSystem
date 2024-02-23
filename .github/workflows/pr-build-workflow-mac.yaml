@@ -1,0 +1,71 @@
+name: PR Mac Build
+
+permissions:
+  contents: write
+  packages: write
+  issues: read
+  checks: write
+  pull-requests: write
+
+on:
+  workflow_dispatch:
+  pull_request:
+
+jobs:
+  build:
+    name: test with ${{ matrix.py }} on mac
+    runs-on: macos-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        py:
+          - "3.12"
+          - "3.11"
+          - "3.10"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Homebrew
+        id: set-up-homebrew
+        uses: Homebrew/actions/setup-homebrew@master
+
+      - name: Install prerequisites
+        run: |
+          brew install mysql-client
+
+      - name: Setup python for test ${{ matrix.py }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.py }}
+
+      - name: Install tox and pex dependencies
+        run: |
+          python -m pip install --upgrade pip
+          export PKG_CONFIG_PATH=/usr/local/opt/mysql-client/lib/pkgconfig
+          python -m pip install pex tox tox-gh
+
+      - name: Build Software
+        run: |
+          export PKG_CONFIG_PATH=/usr/local/opt/mysql-client/lib/pkgconfig
+          tox
+
+      - name: Build documentation
+        run: |
+          export PKG_CONFIG_PATH=/usr/local/opt/mysql-client/lib/pkgconfig
+          tox -e docs
+
+      - name: Build distributable packages
+        run: |
+          export PKG_CONFIG_PATH=/usr/local/opt/mysql-client/lib/pkgconfig
+          tox -e package
+
+      - name: Verify pex package is runnable
+        run: ./dist/seriesmgmt_.pex
+
+      - name: Verify package is runnable
+        run: |
+          export PKG_CONFIG_PATH=/usr/local/opt/mysql-client/lib/pkgconfig
+          pip install -e .
+          python scripts/test.py -h

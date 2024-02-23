@@ -7,4 +7,3 @@ it should be booked.
 
 ``adnitc`` adresses these problems. It allows to parse the information contained in
 the comment field of an event and creates the corersponding ITC entries.
-
