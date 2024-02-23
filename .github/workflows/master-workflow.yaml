@@ -72,7 +72,7 @@ jobs:
           PACKAGE_VERSION: ${{ steps.versioncheck.outputs.local_version }}
 
       - name: Verify pex package is runnable
-        run: ./dist/SeriesManagementSystem_${{ steps.versioncheck.outputs.local_version }}.pex
+        run: ./dist/seriesmgmt_${{ steps.versioncheck.outputs.local_version }}.pex
 
       - name: Verify package is runnable
         run: |
