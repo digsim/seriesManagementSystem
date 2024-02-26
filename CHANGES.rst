@@ -1,7 +1,7 @@
 Changelog
 ============
 
-1.1.8 (unreleased)
+1.3.0 (2024-02-26)
 ------------------
 
 - fix: correct name in pyproject.toml to match name in pypi
