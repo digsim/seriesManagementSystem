@@ -1,5 +1,5 @@
 [project]
-name = "SeriesManagementSystem"
+name = "seriesManagementSystem"
 authors = [
     {name = "Andreas Ruppen", email = "andreas.ruppen@gmail.com"},
 ]
