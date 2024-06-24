@@ -104,6 +104,9 @@ docs/presentation.tar.bz2
 # PyBuilder
 target/
 
+# direnv
+.envrc
+
 test.db
 *~
 tvshows.log
