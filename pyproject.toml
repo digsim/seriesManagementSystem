@@ -51,7 +51,7 @@ build-backend = "setuptools.build_meta"
 dependencies = {file = ["requirements.txt"]}
 
 [tool.setuptools]
-package-data = {'mtvs.etc'= ['logging.yaml', 'seriesmgmtsystem.conf', 'serieManagementSystem-completion.bash']}
+package-data = {'seriesManagementSystem.etc'= ['logging.yaml', 'seriesmgmtsystem.conf', 'serieManagementSystem-completion.bash']}
 
 [tool.setuptools.packages.find]
 where = ["src"]
