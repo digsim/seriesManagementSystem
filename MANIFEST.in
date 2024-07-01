@@ -19,4 +19,5 @@ recursive-include src *.tex
 include *.rst *.md tox.ini
 include requirements.txt
 exclude .pre-commit-config.yaml
+exclude commits_check_config.yaml
 recursive-exclude mtvs *.pyc *~
