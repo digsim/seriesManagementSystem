@@ -30,7 +30,7 @@ import tarfile
 import typing
 import zipfile
 
-log = logging.getLogger('seriesManagementSystem')
+log = logging.getLogger("seriesManagementSystem")
 
 
 def myZip(directory: str, destZipFile: str, zipPrefix: str = ".") -> None:
@@ -38,7 +38,7 @@ def myZip(directory: str, destZipFile: str, zipPrefix: str = ".") -> None:
     log.debug("Zipping directory: " + directory + " to " + str(destZipFile))
     if len(os.listdir(directory)) == 0:
         return
-    zippedDir = zipfile.ZipFile(destZipFile, 'w')
+    zippedDir = zipfile.ZipFile(destZipFile, "w")
 
     def zipTreeWalker(args: list[typing.Any], dirname: str, fnames: list[str]) -> None:
         theZipArch = args[0]
@@ -47,31 +47,35 @@ def myZip(directory: str, destZipFile: str, zipPrefix: str = ".") -> None:
         fnames.sort()
         for file in fnames:
             file = os.path.join(dirname, file)
-            archiveName = file[len(os.path.commonprefix((root, file))) + 1:]
+            archiveName = file[len(os.path.commonprefix((root, file))) + 1 :]
             archiveName = os.path.join(prefix, archiveName)
             if not os.path.isdir(file):
                 theZipArch.write(file, archiveName)
+
     for root, dirs, files in os.walk(directory):
         zipTreeWalker([zippedDir, directory, zipPrefix], root, files)
 
 
 def myTar(directory: str, destTarFile: str, zipPrefix: str = ".") -> str | None:
     """Creates a tar.gz file of a directory to destTarFile"""
-    def isSvn(f: tarfile.TarInfo) -> (tarfile.TarInfo | None):
+
+    def isSvn(f: tarfile.TarInfo) -> tarfile.TarInfo | None:
         if f.name.endswith(".svn"):
             return None
         else:
             return f
 
     log.debug("Tar.gz - ing " + directory + " to " + destTarFile + ". Using python tar")
-    containingFolder = os.path.basename(destTarFile)[:os.path.basename(destTarFile).find(".")]
+    containingFolder = os.path.basename(destTarFile)[
+        : os.path.basename(destTarFile).find(".")
+    ]
     tarTempName = "/tmp/tmp.tar.gz"
     files = os.listdir(directory)
     if len(files) == 0:
         return None
     cwd = os.getcwd()
     os.chdir(os.path.join(cwd, directory))
-    with tarfile.open(tarTempName, 'w:gz') as tarArchive:
+    with tarfile.open(tarTempName, "w:gz") as tarArchive:
         for file in files:
             tarArchive.add(file, containingFolder + "/" + file, filter=isSvn)
         os.chdir(cwd)
@@ -84,11 +88,18 @@ def myTar(directory: str, destTarFile: str, zipPrefix: str = ".") -> str | None:
 
 def sysTar(directory: str, destTarFile: os.PathLike, zipPrefix: str = ".") -> None:
     cwd = os.getcwd()
-    log.debug("Tar.gz - ing " + directory + " to " + str(destTarFile) + ". Using system tar")
+    log.debug(
+        "Tar.gz - ing " + directory + " to " + str(destTarFile) + ". Using system tar"
+    )
     tarTempName = "/tmp/tmp.tar.gz"
     basename = os.path.basename(directory)
     dirname = os.path.dirname(directory)
     os.chdir(os.path.join(cwd, dirname))
-    subprocess.call(["tar -czf " + tarTempName + r" --exclude='\.svn' " + basename], shell=True, cwd="./", stdout=open("/dev/stdout", 'w'))
+    subprocess.call(
+        ["tar -czf " + tarTempName + r" --exclude='\.svn' " + basename],
+        shell=True,
+        cwd="./",
+        stdout=open("/dev/stdout", "w"),
+    )
     os.chdir(cwd)
     shutil.move(tarTempName, destTarFile)

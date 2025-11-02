@@ -59,7 +59,7 @@ from shutil import copytree
 from subprocess import DEVNULL
 from subprocess import STDOUT
 
-from pkg_resources import resource_filename
+import importlib.resources as resources
 
 from seriesmgmtsystem.utils import Utils
 from seriesmgmtsystem.utils import ZipUtils
@@ -67,28 +67,61 @@ from seriesmgmtsystem.utils.LaTeX import LaTeX
 
 
 class SMS:
-    def __init__(self, updateBibTex: bool, keepUnzipped: bool, keepTemp: bool, doZip: bool, _serie: int = 1, _exercise: int = -1) -> None:
+    def __init__(
+        self,
+        updateBibTex: bool,
+        keepUnzipped: bool,
+        keepTemp: bool,
+        doZip: bool,
+        _serie: int = 1,
+        _exercise: int = -1,
+    ) -> None:
 
-        self.__log = logging.getLogger('Tube4Droid')
+        self.__log = logging.getLogger("Tube4Droid")
 
         self.__cwd = os.getcwd()
         self.__keepTempFiles = keepTemp
 
         self.__log.debug("\033[1;33m" + self.__cwd + "\033[0m")
-        self.__exoStructure = ["code", "code/donne", "code/solution", "latex",
-                               "latex/ressources", "latex/ressources/figures", "latex/ressources/code"]
-        data_dir_spec: str = importlib.util.find_spec('seriesmgmtsystem').origin  # type: ignore
+        self.__exoStructure = [
+            "code",
+            "code/donne",
+            "code/solution",
+            "latex",
+            "latex/ressources",
+            "latex/ressources/figures",
+            "latex/ressources/code",
+        ]
+        data_dir_spec: str = importlib.util.find_spec("seriesmgmtsystem").origin  # type: ignore
         data_dir_path = os.path.dirname(data_dir_spec)
         self.__DATA_DIR = os.path.join(data_dir_path, "etc")
+        self.__log.info("Data dir is: " + self.__DATA_DIR)
 
         self.__log.debug("Reading general configuration from lecture.cfg")
         smsConfig = configparser.ConfigParser()
-        smsConfig.read([os.path.join(self.__DATA_DIR, 'lecture.cfg'), "lecture.cfg"])
+        smsConfig.read([os.path.join(self.__DATA_DIR, "lecture.cfg"), "lecture.cfg"])
         self.__smscmoodleOutputDir = smsConfig.get("Config", "moodleOutputDir")
-        self.__smscremoveUnzipped = smsConfig.getboolean("Config", "removeUnzipped") if not keepUnzipped else not keepUnzipped
-        self.__smscdozipfiles = smsConfig.getboolean("Config", "createZip") if not doZip else doZip
-        self.__smscupdateBibTex = smsConfig.getboolean("Config", "updateBibTex") if not updateBibTex else updateBibTex
-        self.__log.info("booleans are: " + str(self.__smscremoveUnzipped) + ", " + str(self.__smscdozipfiles) + ", " + str(self.__smscupdateBibTex))
+        self.__smscremoveUnzipped = (
+            smsConfig.getboolean("Config", "removeUnzipped")
+            if not keepUnzipped
+            else not keepUnzipped
+        )
+        self.__smscdozipfiles = (
+            smsConfig.getboolean("Config", "createZip") if not doZip else doZip
+        )
+        self.__smscupdateBibTex = (
+            smsConfig.getboolean("Config", "updateBibTex")
+            if not updateBibTex
+            else updateBibTex
+        )
+        self.__log.info(
+            "booleans are: "
+            + str(self.__smscremoveUnzipped)
+            + ", "
+            + str(self.__smscdozipfiles)
+            + ", "
+            + str(self.__smscupdateBibTex)
+        )
         self.__smscopencmd = smsConfig.get("Config", "opencmd")
         self.__smcsdebuglevel = smsConfig.getint("Config", "debugLevel")
         if smsConfig.has_option("Config", "addClearPage"):
@@ -119,17 +152,17 @@ class SMS:
             "? ",
             "Type  H <return>  for immediate help.",
             "Enter file name: ",
-            "or enter new name. (Default extension: sty)"
+            "or enter new name. (Default extension: sty)",
         )
         self.__latex_recompile_messages = (
             "recompile ",
             "re-run ",
             "undefined references.",
-            "rerun "
+            "rerun ",
         )
         self.__serie = _serie
         self.__exercise = _exercise
-        self.__exclude_from_zip = {'nbproject'}
+        self.__exclude_from_zip = {"nbproject"}
 
     def createNewExercice(self) -> None:
         self.__exercise = Utils.nextUnusedExercice(self.__exoDirName)
@@ -138,8 +171,14 @@ class SMS:
         os.mkdir(self.__exoDirName + "/" + "ex" + str(self.__exercise))
         for adir in self.__exoStructure:
             os.mkdir(self.__exoDirName + "/" + "ex" + str(self.__exercise) + "/" + adir)
-        extex = open(self.__exoDirName + "/" + "ex" + str(self.__exercise) + "/latex/exo.tex", 'w')
-        soltex = open(self.__exoDirName + "/" + "ex" + str(self.__exercise) + "/latex/exosol.tex", 'w')
+        extex = open(
+            self.__exoDirName + "/" + "ex" + str(self.__exercise) + "/latex/exo.tex",
+            "w",
+        )
+        soltex = open(
+            self.__exoDirName + "/" + "ex" + str(self.__exercise) + "/latex/exosol.tex",
+            "w",
+        )
         extex.write("\\exercice{}\n")
         extex.write(r"voir le site \cite{WEBT} et \cite{T03}")
         soltex.write("\\exercice{}\n")
@@ -152,44 +191,89 @@ class SMS:
             Utils.doUpdateBibTex(self.__smscbibtex, self.__noCiteList)
         seriesConfig = configparser.ConfigParser()
         self.__log.debug(self.__seriesConfigDir + "/serie" + str(self.__serie) + ".cfg")
-        seriesConfig.read(self.__seriesConfigDir + "/serie" + str(self.__serie) + ".cfg")
-        titles = seriesConfig.get('Serie', 'titles')
-        numbers = seriesConfig.get('Serie', 'exo-numbers')
+        seriesConfig.read(
+            self.__seriesConfigDir + "/serie" + str(self.__serie) + ".cfg"
+        )
+        titles = seriesConfig.get("Serie", "titles")
+        numbers = seriesConfig.get("Serie", "exo-numbers")
         # draft = seriesConfig.getboolean('Serie', 'draft')
         # check if dir exists with os.path.isdir
-        if os.path.isdir(os.path.join(self.__outputDir, self.__smscmoodleOutputDir + str(self.__serie))):
-            shutil.rmtree(os.path.join(self.__outputDir,
-                          self.__smscmoodleOutputDir + str(self.__serie)))
-        os.mkdir(os.path.join(self.__outputDir,
-                 self.__smscmoodleOutputDir + str(self.__serie)))
-        os.mkdir(os.path.join(os.path.join(self.__outputDir,
-                 self.__smscmoodleOutputDir + str(self.__serie)), 'donne'))
-        os.mkdir(os.path.join(os.path.join(self.__outputDir,
-                 self.__smscmoodleOutputDir + str(self.__serie)), 'solution'))
+        if os.path.isdir(
+            os.path.join(
+                self.__outputDir, self.__smscmoodleOutputDir + str(self.__serie)
+            )
+        ):
+            shutil.rmtree(
+                os.path.join(
+                    self.__outputDir, self.__smscmoodleOutputDir + str(self.__serie)
+                )
+            )
+        os.mkdir(
+            os.path.join(
+                self.__outputDir, self.__smscmoodleOutputDir + str(self.__serie)
+            )
+        )
+        os.mkdir(
+            os.path.join(
+                os.path.join(
+                    self.__outputDir, self.__smscmoodleOutputDir + str(self.__serie)
+                ),
+                "donne",
+            )
+        )
+        os.mkdir(
+            os.path.join(
+                os.path.join(
+                    self.__outputDir, self.__smscmoodleOutputDir + str(self.__serie)
+                ),
+                "solution",
+            )
+        )
 
-        outputDir = os.path.join(os.path.join(
-            self.__outputDir, self.__smscmoodleOutputDir + str(self.__serie)), 'donne')
-        self.__doCreateSerie(titles.split(','), numbers.split(','), outputDir)
-        outputDir = os.path.join(os.path.join(
-            self.__outputDir, self.__smscmoodleOutputDir + str(self.__serie)), 'solution')
-        self.__doCreateSolution(titles.split(','), numbers.split(','), outputDir)
+        outputDir = os.path.join(
+            os.path.join(
+                self.__outputDir, self.__smscmoodleOutputDir + str(self.__serie)
+            ),
+            "donne",
+        )
+        self.__doCreateSerie(titles.split(","), numbers.split(","), outputDir)
+        outputDir = os.path.join(
+            os.path.join(
+                self.__outputDir, self.__smscmoodleOutputDir + str(self.__serie)
+            ),
+            "solution",
+        )
+        self.__doCreateSolution(titles.split(","), numbers.split(","), outputDir)
         self.__addCodeDonne(numbers.split(","))
         self.__addCodeSolution(numbers.split(","))
 
         Utils.cleanTempFiles(self.__keepTempFiles)
 
-    def __doCreateSerie(self, _titles: list[str], _numbers: list[str], _outputDir: str, filename: str = "serie") -> str:
+    def __doCreateSerie(
+        self,
+        _titles: list[str],
+        _numbers: list[str],
+        _outputDir: str,
+        filename: str = "serie",
+    ) -> str:
         filename = filename or "serie" + str(self.__serie)
         texfile = os.path.join("/tmp/", filename + ".tex")
-        serie = open(texfile, 'w')  # use open(file 'a') for appending to a given file
-        self.__smscsolutiontext = ''
+        serie = open(texfile, "w")  # use open(file 'a') for appending to a given file
+        self.__smscsolutiontext = ""
         latex = LaTeX(self.__serie)
         latex.createHeader(serie, _titles)
 
         for number in _numbers:
-            serie.write(r'\setcounter{section}{' + number + '}\n')
-            serie.write(r'\addtocounter{section}{-1}' + '\n')
-            serie.write(r'\renewcommand{\includepath}{\compilationpath/' + self.__exoDirName + '/ex' + number + '/latex/ressources}' + '\n')
+            serie.write(r"\setcounter{section}{" + number + "}\n")
+            serie.write(r"\addtocounter{section}{-1}" + "\n")
+            serie.write(
+                r"\renewcommand{\includepath}{\compilationpath/"
+                + self.__exoDirName
+                + "/ex"
+                + number
+                + "/latex/ressources}"
+                + "\n"
+            )
             exo = open(self.__exoDirName + "/" + "ex" + number + "/latex/exo.tex")
             for line in exo:
                 serie.write(line)
@@ -200,17 +284,30 @@ class SMS:
         Utils.doLatex(texfile, _outputDir)
         return os.path.join(_outputDir, filename + ".pdf")
 
-    def __doCreateSolution(self, _titles: list[str], _numbers: list[str], _outputDir: str, filename: str = "serie") -> str:
+    def __doCreateSolution(
+        self,
+        _titles: list[str],
+        _numbers: list[str],
+        _outputDir: str,
+        filename: str = "serie",
+    ) -> str:
         filename = filename or "solution" + str(self.__serie)
         texfile = os.path.join("/tmp/", filename + ".tex")
-        solution = open(texfile, 'w')
+        solution = open(texfile, "w")
         latex = LaTeX(self.__serie)
         latex.createHeader(solution, _titles, True)
 
         for number in _numbers:
-            solution.write(r'\setcounter{section}{' + number + '}\n')
-            solution.write(r'\addtocounter{section}{-1}' + '\n')
-            solution.write(r'\renewcommand{\includepath}{\compilationpath/' + self.__exoDirName + '/ex' + number + '/latex/ressources}' + '\n')
+            solution.write(r"\setcounter{section}{" + number + "}\n")
+            solution.write(r"\addtocounter{section}{-1}" + "\n")
+            solution.write(
+                r"\renewcommand{\includepath}{\compilationpath/"
+                + self.__exoDirName
+                + "/ex"
+                + number
+                + "/latex/ressources}"
+                + "\n"
+            )
             exo = open(self.__exoDirName + "/" + "ex" + number + "/latex/exosol.tex")
             for line in exo:
                 solution.write(line)
@@ -226,7 +323,16 @@ class SMS:
         self.__log.info("Adding source code for donnee")
         for number in _exonumbers:
             # ZipUtils.myZip(self.__exoDirName+"/"+"ex"+number+"/code/donne", os.path.join(os.path.join(self.__outputDir,self.__smscmoodleOutputDir+str(self.__serie)),'donne/donnee_s'+str(self.__serie)+'_e'+number+'.zip'), 'donnee_s'+str(self.__serie)+'_e'+number)
-            ZipUtils.myTar(self.__exoDirName + "/" + "ex" + number + "/code/donne", os.path.join(os.path.join(self.__outputDir, self.__smscmoodleOutputDir + str(self.__serie)), 'donne/donnee_s' + str(self.__serie) + '_e' + number + '.tar.gz'), 'donnee_s' + str(self.__serie) + '_e' + number)
+            ZipUtils.myTar(
+                self.__exoDirName + "/" + "ex" + number + "/code/donne",
+                os.path.join(
+                    os.path.join(
+                        self.__outputDir, self.__smscmoodleOutputDir + str(self.__serie)
+                    ),
+                    "donne/donnee_s" + str(self.__serie) + "_e" + number + ".tar.gz",
+                ),
+                "donnee_s" + str(self.__serie) + "_e" + number,
+            )
             # ZipUtils.sysTar(self.__exoDirName+"/"+"ex"+number+"/code/donne", os.path.join(os.path.join(self.__outputDir,self.__smscmoodleOutputDir+str(self.__serie)),'donne/donnee_s'+str(self.__serie)+'_e'+number+'.tar.gz'), 'donnee_s'+str(self.__serie)+'_e'+number)
 
     def __addCodeSolution(self, _exonumbers: list[str]) -> None:
@@ -234,7 +340,20 @@ class SMS:
         self.__log.info("Adding source code for solution")
         for number in _exonumbers:
             # ZipUtils.myZip(self.__exoDirName+"/"+"ex"+number+"/code/solution", os.path.join(os.path.join(self.__outputDir, self.__smscmoodleOutputDir+str(self.__serie)), 'solution/solution_s'+str(self.__serie)+'_e'+number+'.zip'), 'solution_s'+str(self.__serie)+'_e'+number)
-            ZipUtils.myTar(self.__exoDirName + "/" + "ex" + number + "/code/solution", os.path.join(os.path.join(self.__outputDir, self.__smscmoodleOutputDir + str(self.__serie)), 'solution/solution_s' + str(self.__serie) + '_e' + number + '.tar.gz'), 'solution_s' + str(self.__serie) + '_e' + number)
+            ZipUtils.myTar(
+                self.__exoDirName + "/" + "ex" + number + "/code/solution",
+                os.path.join(
+                    os.path.join(
+                        self.__outputDir, self.__smscmoodleOutputDir + str(self.__serie)
+                    ),
+                    "solution/solution_s"
+                    + str(self.__serie)
+                    + "_e"
+                    + number
+                    + ".tar.gz",
+                ),
+                "solution_s" + str(self.__serie) + "_e" + number,
+            )
             # ZipUtils.sysTar(self.__exoDirName+"/"+"ex"+number+"/code/solution", os.path.join(os.path.join(self.__outputDir, self.__smscmoodleOutputDir+str(self.__serie)), 'solution/solution_s'+str(self.__serie)+'_e'+number+'.tar.gz'), 'solution_s'+str(self.__serie)+'_e'+number)
 
     def buildAllSeries(self) -> None:
@@ -248,9 +367,16 @@ class SMS:
         self.__outputDir = self.__smscmoodleOutputDir
         for config in seriesConfigFiles:
             if not config.startswith("."):
-                self.__log.debug("Will treat from file: " + config + " serie:" + config.split(".")[0].partition("serie")[2])
+                self.__log.debug(
+                    "Will treat from file: "
+                    + config
+                    + " serie:"
+                    + config.split(".")[0].partition("serie")[2]
+                )
                 self.__serie = int(config.split(".")[0].partition("serie")[2])
-                self.__log.info("Found Serie " + str(self.__serie) + ". Will now build it.")
+                self.__log.info(
+                    "Found Serie " + str(self.__serie) + ". Will now build it."
+                )
                 self.buildSerie()
 
     def makeWorkbook(self) -> None:
@@ -265,29 +391,54 @@ class SMS:
             self.__serie = int(config.split(".")[0].partition("serie")[2])
             self.__log.info("Found Serie " + str(self.__serie) + ". Will now build it.")
             seriesConfig = configparser.ConfigParser()
-            self.__log.debug("Reading " + self.__seriesConfigDir + "/serie" + str(self.__serie) + ".cfg")
+            self.__log.debug(
+                "Reading "
+                + self.__seriesConfigDir
+                + "/serie"
+                + str(self.__serie)
+                + ".cfg"
+            )
             seriesConfig.read(self.__seriesConfigDir + "/" + config)
-            titles = seriesConfig.get('Serie', 'titles')
-            numbers = seriesConfig.get('Serie', 'exo-numbers')
+            titles = seriesConfig.get("Serie", "titles")
+            numbers = seriesConfig.get("Serie", "exo-numbers")
 
             outputDir = self.__smscmoodleOutputDir
             seriesname = str(self.__serie) + "serie"
-            seriesname = self.__doCreateSerie(titles.split(','), numbers.split(','), outputDir, seriesname)
+            seriesname = self.__doCreateSerie(
+                titles.split(","), numbers.split(","), outputDir, seriesname
+            )
             solutionname = str(self.__serie) + "solution"
-            solutionname = self.__doCreateSolution(titles.split(','), numbers.split(','), outputDir, solutionname)
+            solutionname = self.__doCreateSolution(
+                titles.split(","), numbers.split(","), outputDir, solutionname
+            )
 
         self.__makeWorkBookTitlePage(outputDir)
         if self.__usepdftk:
-            subprocess.call(["pdftk " + outputDir + "/*.pdf cat output workbook.pdf"],
-                            shell=True, cwd="./", stdout=DEVNULL, stderr=STDOUT)
+            subprocess.call(
+                ["pdftk " + outputDir + "/*.pdf cat output workbook.pdf"],
+                shell=True,
+                cwd="./",
+                stdout=DEVNULL,
+                stderr=STDOUT,
+            )
         else:
-            subprocess.call(["gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=workbook.pdf " + outputDir + "/*.pdf"], shell=True, cwd="./", stdout=DEVNULL, stderr=STDOUT)
+            subprocess.call(
+                [
+                    "gs -q -dNOPAUSE -dBATCH -sDEVICE=pdfwrite -sOutputFile=workbook.pdf "
+                    + outputDir
+                    + "/*.pdf"
+                ],
+                shell=True,
+                cwd="./",
+                stdout=DEVNULL,
+                stderr=STDOUT,
+            )
         shutil.rmtree(self.__smscmoodleOutputDir)
         Utils.cleanTempFiles(self.__keepTempFiles)
 
     def __makeWorkBookTitlePage(self, _outputDir: str) -> None:
         texfile = "/tmp/0wbtitlepage.tex"
-        wbtitle = open(texfile, 'w')
+        wbtitle = open(texfile, "w")
         latex = LaTeX(self.__serie)
         latex.makeWorkBookTitlePageHeader(wbtitle)
         seriesConfigFiles = os.listdir(self.__seriesConfigDir)
@@ -296,11 +447,12 @@ class SMS:
         for config in seriesConfigFiles:
             seriesConfig = configparser.ConfigParser()
             seriesConfig.read(self.__seriesConfigDir + "/" + config)
-            titles = seriesConfig.get('Serie', 'titles')
-            numbers = seriesConfig.get('Serie', 'exo-numbers')
+            titles = seriesConfig.get("Serie", "titles")
+            numbers = seriesConfig.get("Serie", "exo-numbers")
             serienumber = config.split(".")[0].partition("serie")[2]
             wbtitle.write(
-                r"\textsf{ \textbf{S{\'e}rie " + serienumber + r"}} \dotfill" + "\n")
+                r"\textsf{ \textbf{S{\'e}rie " + serienumber + r"}} \dotfill" + "\n"
+            )
             for number in numbers.split(","):
                 wbtitle.write(number + "\n")
             wbtitle.write(r"\begin{itemize}" + "\n")
@@ -318,36 +470,61 @@ class SMS:
         if os.path.isdir("Catalogue"):
             shutil.rmtree("Catalogue")
         os.mkdir("Catalogue")
-        catalogue = open(afile, 'w')  # use open(file 'a') for appending to a given file
+        catalogue = open(afile, "w")  # use open(file 'a') for appending to a given file
         latex = LaTeX(self.__serie)
         latex.createHeader(catalogue, [])
         catalogue.write(
-            r'\renewcommand{\exercice}[1]{\subsection*{Problem: #1}}' + "\n")
+            r"\renewcommand{\exercice}[1]{\subsection*{Problem: #1}}" + "\n"
+        )
         catalogue.write(
-            r'\renewcommand{\solution}[1]{\subsection*{Solution: #1}}' + "\n")
-        catalogue.write(r'\renewcommand{\question}[1]{\subsubsection*{#1}}' + "\n")
-        catalogue.write(r'' + "\n")
-        catalogue.write(r'\makeatletter' + "\n")
+            r"\renewcommand{\solution}[1]{\subsection*{Solution: #1}}" + "\n"
+        )
+        catalogue.write(r"\renewcommand{\question}[1]{\subsubsection*{#1}}" + "\n")
+        catalogue.write(r"" + "\n")
+        catalogue.write(r"\makeatletter" + "\n")
         catalogue.write(
-            r'\renewcommand{\section}{\@startsection{section}{3}{2pt}{12pt}{10pt}{\center \huge \sffamily \bfseries}}' + "\n")
-        catalogue.write(r'\renewcommand{\thesection}{(\roman{section})}' + "\n")
-        catalogue.write(r'\renewcommand{\thesubsection}{(\roman{subsection})}' + "\n")
+            r"\renewcommand{\section}{\@startsection{section}{3}{2pt}{12pt}{10pt}{\center \huge \sffamily \bfseries}}"
+            + "\n"
+        )
+        catalogue.write(r"\renewcommand{\thesection}{(\roman{section})}" + "\n")
+        catalogue.write(r"\renewcommand{\thesubsection}{(\roman{subsection})}" + "\n")
         exos = os.listdir(self.__exoDirName)
         # exos.sort()
         exos = Utils.natsort(exos)
         for exo in exos:
             if exo.find("ex") != -1:
                 number = exo[2:]
-                catalogue.write(r'\section*{Exercise ' + number + '}' + "\n")
-                catalogue.write(r'\renewcommand{\includepath}{\compilationpath/' + self.__exoDirName + '/ex' + number + '/latex/resources}' + '\n')
-                exo_file = open(os.path.join(os.path.join(
-                    self.__exoDirName, "ex" + number), "latex/exo.tex"))
+                catalogue.write(r"\section*{Exercise " + number + "}" + "\n")
+                catalogue.write(
+                    r"\renewcommand{\includepath}{\compilationpath/"
+                    + self.__exoDirName
+                    + "/ex"
+                    + number
+                    + "/latex/resources}"
+                    + "\n"
+                )
+                exo_file = open(
+                    os.path.join(
+                        os.path.join(self.__exoDirName, "ex" + number), "latex/exo.tex"
+                    )
+                )
                 for line in exo_file:
                     catalogue.write(line)
                 exo_file.close()
-                catalogue.write(r'\renewcommand{\includepath}{\compilationpath/' + self.__exoDirName + '/ex' + number + '/latex/resources}' + '\n')
-                solution = open(os.path.join(os.path.join(
-                    self.__exoDirName, "ex" + number), "latex/exosol.tex"))
+                catalogue.write(
+                    r"\renewcommand{\includepath}{\compilationpath/"
+                    + self.__exoDirName
+                    + "/ex"
+                    + number
+                    + "/latex/resources}"
+                    + "\n"
+                )
+                solution = open(
+                    os.path.join(
+                        os.path.join(self.__exoDirName, "ex" + number),
+                        "latex/exosol.tex",
+                    )
+                )
                 for line in solution:
                     catalogue.write(line)
                 solution.close()
@@ -364,7 +541,7 @@ class SMS:
 
     def previewExercice(self) -> None:
         self.__serie = 0
-        self. __doCreateSerie([], [str(self.__exercise)], "/tmp/")
+        self.__doCreateSerie([], [str(self.__exercise)], "/tmp/")
         if self.__smscopencmd.find(",") == -1:
             cmd = self.__smscopencmd
             arg = [cmd, "/tmp/serie0.pdf"]
@@ -377,7 +554,7 @@ class SMS:
 
     def previewSolution(self) -> None:
         self.__serie = 0
-        self. __doCreateSolution([], [str(self.__exercise)], "/tmp/")
+        self.__doCreateSolution([], [str(self.__exercise)], "/tmp/")
         if self.__smscopencmd.find(",") == -1:
             cmd = self.__smscopencmd
             arg = [cmd, "/tmp/solution0.pdf"]
@@ -392,26 +569,43 @@ class SMS:
         """Create the directory structure for a new lecture"""
         if os.path.exists(lecturename):
             self.__log.critical(
-                "This lecture already exists. Please choose another name")
+                "This lecture already exists. Please choose another name"
+            )
             return -1
         os.mkdir(lecturename)
-        os.mkdir(os.path.join(lecturename, 'Exercises'))
-        os.mkdir(os.path.join(lecturename, 'Series_properties'))
-        f = open(os.path.join(os.path.join(lecturename, 'Series_properties'), 'serie1.cfg'), 'w')
-        f.write('[Serie]\n')
-        f.write('titles: Classes et ADT, Programmation orient\'ee objets en Java - types statique et dynamique, Java: h\'eritage - polymorphisme - interfaces - ...\n')
-        f.write('exo-numbers: 3,1,2\n')
+        os.mkdir(os.path.join(lecturename, self.__exoDirName))
+        os.mkdir(os.path.join(lecturename, self.__seriesConfigDir))
+        f = open(
+            os.path.join(
+                os.path.join(lecturename, self.__seriesConfigDir), "serie1.cfg"
+            ),
+            "w",
+        )
+        f.write("[Serie]\n")
+        f.write(
+            "titles: Classes et ADT, Programmation orient'ee objets en Java - types statique et dynamique, Java: h'eritage - polymorphisme - interfaces - ...\n"
+        )
+        f.write("exo-numbers: 3,1,2\n")
         f.close()
-        self.__log.debug(resource_filename(__name__, 'data'))
-        copytree(resource_filename(__name__, 'data'),
-                 lecturename)
+        src = resources.files("seriesmgmtsystem") / "data"
+        self.__log.info("Copying from " + str(src) + " to " + lecturename)
+        copytree(src, lecturename, dirs_exist_ok=True)  # type: ignore[arg-type]
         return 0
 
     def doZip(self) -> None:
         if self.__smscdozipfiles:
-            self.__log.info("Zipping " + self.__smscmoodleOutputDir + " into " + self.__smscmoodleOutputDir + '.zip')
-            ZipUtils.myZip(self.__smscmoodleOutputDir,
-                           self.__smscmoodleOutputDir + '.zip', self.__smscmoodleOutputDir)
+            self.__log.info(
+                "Zipping "
+                + self.__smscmoodleOutputDir
+                + " into "
+                + self.__smscmoodleOutputDir
+                + ".zip"
+            )
+            ZipUtils.myZip(
+                self.__smscmoodleOutputDir,
+                self.__smscmoodleOutputDir + ".zip",
+                self.__smscmoodleOutputDir,
+            )
             if self.__smscremoveUnzipped:
                 shutil.rmtree(self.__smscmoodleOutputDir)
 
@@ -424,5 +618,5 @@ class checkInstallException(Exception):
         for prog in missingProg:
             message += prog
             message += "; "
-        message = message[0:len(message) - 2]
+        message = message[0 : len(message) - 2]
         self.missing = message
