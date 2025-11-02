@@ -4,9 +4,9 @@ authors = [
     {name = "Andreas Ruppen", email = "andreas.ruppen@gmail.com"},
 ]
 description = "Manages and Creates Execises"
-readme = "README.md"
+readme = "README.rst"
 requires-python = ">=3.10"
-license = {file = "LICENSE.rst"}
+license-files = ["LICEN[CS]E*"]
 classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",

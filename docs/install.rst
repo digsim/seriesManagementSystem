@@ -41,8 +41,8 @@ From a terminal launch::
 
     pip install .
 
-This will compile and install the project to the pyhton libraries (eg. ``/usr/local/lib/python3.12/site-packages/seriesManagementSystem-1.3.1.dev13.dist-info``). Furthermore it will install a script in ``/usr/local/bin/``:
-* missingtvshows
+This will compile and install the project to the python libraries (eg. ``/usr/local/lib/python3.12/site-packages/seriesManagementSystem-1.3.1.dev13.dist-info``). Furthermore, it will install a script in ``/usr/local/bin/``:
+* seriesManagementSystem
 
 Upon the first start a copy of a pristine application and logging configuration are created in the user's home directory ``~/.SeriesManagementSystem/``. From this point on configuration files are read from this location. It is however possible to overwrite them either by placing a file with the same name (but prefixed with a dot eg. ``.logging.conf``) in the current working directory.
 
@@ -54,6 +54,33 @@ from a terminal launch::
     pip install -e .
 
 does the same as before but, uses links instead of copying files.
+
+Code Guideline Checking
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+To check the code guidelines run::
+
+    flake8 --max-line-length=88 --statistics --extend-ignore=E501,E203,W503 --select=E,W,F .
+
+
+After fixing the issues you can reformat the code with::
+
+    black .
+
+Run type checks
+^^^^^^^^^^^^^^^^^^^^^^
+
+To run type checks on the code base use::
+
+    mypy src tests
+
+All in one command
+^^^^^^^^^^^^^^^^^^^^^^
+
+To run code guideline checks and type checks in one command use::
+
+    tox -e lint,type
+
 
 Clean Working directory
 ^^^^^^^^^^^^^^^^^^^^^^^^
