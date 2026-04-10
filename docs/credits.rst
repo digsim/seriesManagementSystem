@@ -1,4 +1,4 @@
-adnitc contributors
+seriesManagementSystem contributors
 ======================
 
 - Andreas Ruppen <andreas.ruppen@gmail.com>

@@ -37,4 +37,4 @@ pygments_style = "sphinx"
 
 htmlhelp_basename = "seriesManagementSystem"
 
-man_pages = [("index", "adnitc", "adnitc doc", ["Andreas Ruppen"], 1)]
+man_pages = [("index", "seriesManagementSystem", "seriesManagementSystem doc", ["Andreas Ruppen"], 1)]
